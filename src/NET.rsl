@@ -1,18 +1,22 @@
 scheme NET =
 class
   type 
-   Net = (StopId >< Capacity >< DrivingTime)-set, -- tram nets
+   Net = (Stop >< Stop >< Connection)-set, -- tram nets
    StopId = Text,  -- names of stops
    Capacity = Nat, -- capacities
    WaitingTime = Time, -- minimum waiting times 
-   DrivingTime = Time, -- minimum driving times 
+   DrivingTime = Time, -- minimum driving times
+   Stop = StopId >< Capacity >< WaitingTime,
+   Connection = Capacity >< DrivingTime,
    Time = Nat -- times in number of minutes
 
   value /* generators */
     empty :  Net,  -- the empty net
 
     -- insert a stop with a given name, capacity and minimum waiting time
-    insertStop : StopId >< Capacity >< WaitingTime >< Net -> Net,
+    insertStop : StopId >< Capacity >< WaitingTime >< Net -> Net
+    insertstop(stopId, capacity, waitTime, currNet) is
+      currNet union (stopId >< capacity >< DrivingTime),
 
     -- add a connection between given stops, 
     -- with a given capacity and a given minimum driving time 
