@@ -17,7 +17,7 @@ class
     -- add a connection between given stops, 
     -- with a given capacity and a given minimum driving time 
     addConnection : StopId >< StopId >< Capacity >< DrivingTime >< Net -> Net 
-   
+   	addConnection (stopId1, stopId2, capacity, drivingTime, net) is 
   value /* observers */
     -- check whether a stop is in a network     
     isIn : StopId >< Net -> Bool,
