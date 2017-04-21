@@ -1,11 +1,11 @@
-NET
+	NET
 scheme TIMETABLE = extend NET with
 class
   type 
-    TimeTable = ..., -- time tables
-    ...,
-    TramId = Text -- tram names
-
+    TimeTable = TramId -m-> Plan, -- time tables
+    TramId = Text, -- tram names
+	Trip = StopId >< Time >< Time, -- a trip in a time table
+	Plan = <.Trip.>
     value /* generators */
       -- the empty timetable
       empty: TimeTable,
