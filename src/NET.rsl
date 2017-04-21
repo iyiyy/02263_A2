@@ -1,7 +1,7 @@
 scheme NET =
 class
   type 
-   Net = StopId >< Capacity >< DrivingTime, -- tram nets
+   Net = (StopId >< Capacity >< DrivingTime)-set, -- tram nets
    StopId = Text,  -- names of stops
    Capacity = Nat, -- capacities
    WaitingTime = Time, -- minimum waiting times 
@@ -39,5 +39,5 @@ class
  
   value /* predicates to check nets */
     isWellformed : Net -> Bool
-    isWellformed(n) is ...
+    isWellformed(n) is true
 end  
