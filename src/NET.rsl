@@ -1,7 +1,7 @@
 scheme NET =
 class
   type 
-   Net = ..., -- tram nets
+   Net = StopId >< Capacity >< DrivingTime, -- tram nets
    StopId = Text,  -- names of stops
    Capacity = Nat, -- capacities
    WaitingTime = Time, -- minimum waiting times 
