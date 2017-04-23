@@ -17,9 +17,10 @@ class
     insertStop : StopId >< Capacity >< WaitingTime >< Net -> Net
     insertStop(s, c, wt, currNet) is (
       let
-        (ss, conns) = currNet
+        (ss, conns) = currNet,
+        newStop = (s, c, wt)
       in
-        (ss union {(s, c, wt)}, conns)
+        (ss union {newStop}, conns)
       end
     )
     
