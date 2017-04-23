@@ -22,11 +22,20 @@ class
       in
         (ss union {newStop}, conns)
       end
-    )
+    ),
     
     -- add a connection between given stops, 
     -- with a given capacity and a given minimum driving time 
-   -- addConnection : StopId >< StopId >< Capacity >< DrivingTime >< Net -> Net 
+    addConnection : StopId >< StopId >< Capacity >< DrivingTime >< Net -> Net 
+    addConnection(id1, id2, c, dt, currNet) is (
+      let
+        (ss, conns) = currNet,
+        entry = (id1, id2, (c, dt))
+      in
+        (ss, conns union {entry})
+      end
+    )
+    
    
   --value /* observers */
     -- check whether a stop is in a network     
@@ -58,5 +67,11 @@ class
         currNet = insertStop("stop1", 1, 1, empty)
       in
         insertStop("stop2", 1, 1, currNet)
+      end,
+    [t2]
+      let
+        net = insertStop("s1", 1, 1, insertStop("s2", 1, 1, empty))
+      in
+        addConnection("s1", "s2", 1, 12, net)
       end
 end  
