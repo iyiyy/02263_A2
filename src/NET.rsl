@@ -1,26 +1,32 @@
 scheme NET =
 class
   type 
-   Net = Stop-set >< (StopId >< StopId >< Connection)-set, -- tram nets
+   Net ::
+     stops : Stop-set
+     conns : (StopId >< StopId >< Connection)-set,
+   
+   Stop ::
+     id : StopId
+     cap : Capacity
+     wt : WaitingTime,
+   
    StopId = Text,  -- names of stops
    Capacity = Nat, -- capacities
    WaitingTime = Time, -- minimum waiting times 
    DrivingTime = Time, -- minimum driving times
-   Stop = StopId >< Capacity >< WaitingTime,
    Connection = Capacity >< DrivingTime,
    Time = Nat -- times in number of minutes
 
   value /* generators */
-    empty :  Net = ({}, {}),  -- the empty net
+    empty :  Net = mk_Net({}, {}),  -- the empty net
 
     -- insert a stop with a given name, capacity and minimum waiting time
     insertStop : StopId >< Capacity >< WaitingTime >< Net -> Net
-    insertStop(s, c, wt, currNet) is (
+    insertStop(id, cap, wt, currNet) is (
       let
-        (ss, conns) = currNet,
-        newStop = (s, c, wt)
+        newStop = mk_Stop(id, cap, wt)
       in
-        (ss union {newStop}, conns)
+        mk_Net(stops(currNet) union {newStop}, conns(currNet))
       end
     ),
     
@@ -29,20 +35,26 @@ class
     addConnection : StopId >< StopId >< Capacity >< DrivingTime >< Net -> Net 
     addConnection(id1, id2, c, dt, currNet) is (
       let
-        (ss, conns) = currNet,
+        ss = stops(currNet),
         entry = (id1, id2, (c, dt))
       in
-        (ss, conns union {entry})
+        mk_Net(ss, conns(currNet) union {entry})
       end
     )
     
    
-  --value /* observers */
+  value /* observers */
     -- check whether a stop is in a network     
-    --isIn : StopId >< Net -> Bool,
+    isIn : StopId >< Net -> Bool
+    isIn(sId, n) is (
+      exists s : Stop :- s isin stops(n) /\ id(s) = sId
+    )
  
     -- get the capacity of a stop 
-    --capacity : StopId >< Net -~-> Capacity,
+    --capacity : StopId >< Net -~-> Capacity
+    --capacity(sId, n) is (
+       
+    --)
 
     -- get the minimum waiting time of a stop 
     --minWaitingTime : StopId >< Net -~-> Time,
@@ -60,18 +72,28 @@ class
     --isWellformed : Net -> Bool
     --isWellformed(n) is true
     
+    -- get all the stops in the net
+    --getStops : Net -> Stop-set
+    --getStops((stops, conns)) is stops
+    
   test_case
-    [t0] insertStop("stop1", 1, 1, empty),
+    [t0] insertStop("s1", 1, 1, empty),
     [t1]
       let
-        currNet = insertStop("stop1", 1, 1, empty)
+        currNet = insertStop("s1", 1, 1, empty)
       in
-        insertStop("stop2", 1, 1, currNet)
+        insertStop("s2", 1, 1, currNet)
       end,
     [t2]
       let
         net = insertStop("s1", 1, 1, insertStop("s2", 1, 1, empty))
       in
         addConnection("s1", "s2", 1, 12, net)
+      end,
+    [t3]
+      let
+        currNet = insertStop("s1", 1, 1, empty)
+      in
+        isIn("s1", currNet)
       end
 end  
