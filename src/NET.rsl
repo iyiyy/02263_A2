@@ -42,13 +42,9 @@ class
       end
     )
     
-<<<<<<< HEAD
-  --value /* observers */
-
-=======
    
   value /* observers */
->>>>>>> branch 'master' of https://github.com/iyiyy/02263_A2.git
+
     -- check whether a stop is in a network     
     isIn : StopId >< Net -> Bool
     isIn(sId, n) is (
