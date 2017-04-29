@@ -52,7 +52,6 @@ class
     
    
   value /* observers */
-
     -- check whether a stop is in a network     
     isIn : StopId >< Net -> Bool
     isIn(sId, n) is (
@@ -99,10 +98,14 @@ class
     capacity : StopId >< StopId >< Net -~-> Capacity
     capacity(id1, id2, n) is (
       1    
-    )
+    ),
 
     -- get minimum driving time between two connected stops        
-    --minDrivingTime : StopId >< StopId >< Net -~-> Time
+    minDrivingTime : StopId >< StopId >< Net -~-> Time
+    minDrivingTime(id1, id2, n) is (
+      dt(t(getConnection(id1, id2, n)))
+    ) 
+    
  
   value /* predicates to check nets */
     isWellformed : Net -> Bool
