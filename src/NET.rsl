@@ -19,8 +19,12 @@ class
     cap : Capacity
     dt : DrivingTime,
     
-   Connection = StopId >< StopId >< Track
-
+   --Connection = StopId >< StopId >< Track
+    Connection ::
+      id1 : StopId
+      id2 : StopId
+      t : Track
+      
   value /* generators */
     empty :  Net = mk_Net({}, {}),  -- the empty net
 
@@ -40,7 +44,7 @@ class
     addConnection(id1, id2, c, dt, currNet) is (
       let
         ss = stops(currNet),
-        entry = (id1, id2, mk_Track(c, dt))
+        entry = mk_Connection(id1, id2, mk_Track(c, dt))
       in
         mk_Net(ss, conns(currNet) union {entry})
       end
@@ -77,21 +81,30 @@ class
 	),
     -- check whether two stops are directly connected in a network        
     areDirectlyConnected : StopId >< StopId >< Net -> Bool
-	areDirectlyConnected(sId1, sId2, n) is (
-	  let
-	  	conn = conns(n),
-	  	s = {sId1, sId2}
-	  in
-	  	card s < 3
-	  end
+    areDirectlyConnected(id1, id2, n) is (
+	  matchingIds(id1, id2, getConnection(id1, id2, n)) 
 	),
+	
+   getConnection: StopId >< StopId >< Net -~-> Connection
+   getConnection(id1, id2, n) is (
+     hd {c | c : Connection :- c isin conns(n) /\ matchingIds(id1, id2, c) }
+   ),
+	
+    matchingIds : StopId >< StopId >< Connection -> Bool
+    matchingIds(id1, id2, c) is (
+      (id1(c) = id1 /\ id2(c) = id2) \/ 
+      (id1(c) = id2 /\ id2(c) = id1)
+    ),
     -- get the capacity for a connection between two connected stops
-    --capacity : StopId >< StopId >< Net -~-> Capacity,
+    capacity : StopId >< StopId >< Net -~-> Capacity
+    capacity(id1, id2, n) is (
+      1    
+    )
 
     -- get minimum driving time between two connected stops        
     --minDrivingTime : StopId >< StopId >< Net -~-> Time
  
-  --value /* predicates to check nets */
+  value /* predicates to check nets */
     isWellformed : Net -> Bool
     isWellformed(n) is (
       if n = empty then 
@@ -113,9 +126,9 @@ class
     isWellformed : Connection -> Bool
     isWellformed(c) is (
       let
-        (sid1, sid2, t) = c
+        t = t(c)
       in
-       sid1 ~= "" /\ sid2 ~= "" /\ sid1 ~= sid2 /\
+       id1(c) ~= "" /\ id2(c) ~= "" /\ id1(c) ~= id2(c) /\
         cap(t) ~= 0 /\ dt(t) ~= 0
       end
     ),
