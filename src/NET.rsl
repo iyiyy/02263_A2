@@ -3,7 +3,7 @@ class
   type 
    Net ::
      stops : Stop-set
-     conns : (StopId >< StopId >< Connection)-set,
+     conns : Connection-set,
    
    Stop ::
      id : StopId
@@ -12,10 +12,14 @@ class
    
    StopId = Text,  -- names of stops
    Capacity = Nat, -- capacities
+   Time = Nat, -- times in number of minutes
    WaitingTime = Time, -- minimum waiting times 
    DrivingTime = Time, -- minimum driving times
-   Connection = Capacity >< DrivingTime,
-   Time = Nat -- times in number of minutes
+   Track ::
+    cap : Capacity
+    dt : DrivingTime,
+    
+   Connection = StopId >< StopId >< Track
 
   value /* generators */
     empty :  Net = mk_Net({}, {}),  -- the empty net
@@ -36,7 +40,7 @@ class
     addConnection(id1, id2, c, dt, currNet) is (
       let
         ss = stops(currNet),
-        entry = (id1, id2, (c, dt))
+        entry = (id1, id2, mk_Track(c, dt))
       in
         mk_Net(ss, conns(currNet) union {entry})
       end
@@ -88,8 +92,33 @@ class
     --minDrivingTime : StopId >< StopId >< Net -~-> Time
  
   --value /* predicates to check nets */
-    --isWellformed : Net -> Bool
-    --isWellformed(n) is true
+    isWellformed : Net -> Bool
+    isWellformed(n) is (
+      if n = empty then 
+        false
+      else
+        all s : Stop :- s isin stops(n) => (
+          all c : Connection :- c isin conns(n) => (
+            isWellformed(s) /\ isWellformed(c)
+          )
+        )
+      end
+    ),
+    
+    isWellformed : Stop -> Bool
+    isWellformed(s) is (
+        id(s) ~= "" /\ cap(s) ~= 0 /\ wt(s) ~=0 
+    ),
+    
+    isWellformed : Connection -> Bool
+    isWellformed(c) is (
+      let
+        (sid1, sid2, t) = c
+      in
+       sid1 ~= "" /\ sid2 ~= "" /\ sid1 ~= sid2 /\
+        cap(t) ~= 0 /\ dt(t) ~= 0
+      end
+    ),
     
     -- get all the stops in the net
     getStops : Net -> Stop-set
