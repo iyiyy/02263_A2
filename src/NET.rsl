@@ -1,29 +1,30 @@
 scheme NET =
 class
   type 
-   Net ::
-     stops : Stop-set
-     conns : Connection-set,
+    Net ::
+      stops : Stop-set
+      conns : Connection-set,
    
-   Stop ::
-     id : StopId
-     cap : Capacity
-     wt : WaitingTime,
+    Stop ::
+      id : StopId
+      cap : Capacity
+      wt : WaitingTime,
    
-   StopId = Text,  -- names of stops
-   Capacity = Nat, -- capacities
-   Time = Nat, -- times in number of minutes
-   WaitingTime = Time, -- minimum waiting times 
-   DrivingTime = Time, -- minimum driving times
-   Track ::
-    cap : Capacity
-    dt : DrivingTime,
-    
-   --Connection = StopId >< StopId >< Track
+    Track ::
+      cap : Capacity
+      dt : DrivingTime,
+
     Connection ::
-      id1 : StopId
-      id2 : StopId
-      t : Track
+    id1 : StopId
+    id2 : StopId
+      t : Track,
+
+    StopId = Text,  -- names of stops
+    Capacity = Nat, -- capacities
+    Time = Nat, -- times in number of minutes
+    WaitingTime = Time, -- minimum waiting times 
+    DrivingTime = Time -- minimum driving times
+    
       
   value /* generators */
     empty :  Net = mk_Net({}, {}),  -- the empty net
@@ -52,7 +53,6 @@ class
       end
     )
     
-   
   value /* observers */
     -- check whether a stop is in a network     
     isIn : StopId >< Net -> Bool
@@ -63,34 +63,6 @@ class
         false
       end
     ),
-   
-   getStop : StopId >< Net -> Stop
-   getStop(sId, n) is (
-     let
-       s = {s | s : Stop :- s isin stops(n) /\ id(s) = sId}
-     in
-       if s = {} then
-         hd s
-       else
-         emptyStop
-       end
-     end
-   ),
-   
-   hasData : Stop -> Bool
-   hasData(s) is (
-     id(s) ~= "" /\ cap(s) ~= 0 /\ wt(s) ~=0 
-   ),
-   
-    hasData : Connection -> Bool
-    hasData(c) is (
-      let
-        t = t(c)
-      in
-       id1(c) ~= "" /\ id2(c) ~= "" /\ id1(c) ~= id2(c) /\
-        cap(t) ~= 0 /\ dt(t) ~= 0
-      end
-    ),
 
     -- get the capacity of a stop 
     capacity : StopId >< Net -~-> Capacity
@@ -98,11 +70,13 @@ class
       cap(getStop(sId, n))
     ),
 
+   
     -- get the minimum waiting time of a stop 
     minWaitingTime : StopId >< Net -~-> Time
-  minWaitingTime(sId,n) is (
-    wt(getStop(sId, n))
-  ),
+    minWaitingTime(sId,n) is (
+      wt(getStop(sId, n))
+    ),
+
     -- check whether two stops are directly connected in a network        
     areDirectlyConnected : StopId >< StopId >< Net -> Bool
     areDirectlyConnected(id1, id2, n) is (
@@ -115,26 +89,8 @@ class
           false
         end
       end
-  ),
-  
-   getConnection: StopId >< StopId >< Net -~-> Connection
-   getConnection(id1, id2, n) is (
-     let
-       c ={c | c : Connection :- c isin conns(n) /\ matchingIds(id1, id2, c)}
-     in
-       if c = {} then
-         emptyConn
-       else
-         hd c
-       end
-     end
-   ),
-  
-    matchingIds : StopId >< StopId >< Connection -> Bool
-    matchingIds(id1, id2, c) is (
-      (id1(c) = id1 /\ id2(c) = id2) \/ 
-      (id1(c) = id2 /\ id2(c) = id1)
     ),
+
     -- get the capacity for a connection between two connected stops
     capacity : StopId >< StopId >< Net -~-> Capacity
     capacity(id1, id2, n) is (
@@ -145,20 +101,69 @@ class
           0
       end
     ),
+
     -- get minimum driving time between two connected stops        
     minDrivingTime : StopId >< StopId >< Net -~-> Time
     minDrivingTime(id1, id2, n) is (
       dt(t(getConnection(id1, id2, n)))
-    ) 
+    ), 
+    
+    getStop : StopId >< Net -> Stop
+    getStop(sId, n) is (
+      let
+        s = {s | s : Stop :- s isin stops(n) /\ id(s) = sId}
+      in
+        if s = {} then
+          hd s
+        else
+          emptyStop
+        end
+      end
+    ),
+
+    getConnection: StopId >< StopId >< Net -~-> Connection
+    getConnection(id1, id2, n) is (
+      let
+        c ={c | c : Connection :- c isin conns(n) /\ matchingIds(id1, id2, c)}
+      in
+        if c = {} then
+          emptyConn
+        else
+          hd c
+        end
+      end
+    ),
+
+    hasData : Stop -> Bool
+    hasData(s) is (
+      id(s) ~= "" /\ cap(s) ~= 0 /\ wt(s) ~=0 
+    ),
+   
+    hasData : Connection -> Bool
+    hasData(c) is (
+      let
+        t = t(c)
+      in
+        id1(c) ~= "" /\ id2(c) ~= "" /\ id1(c) ~= id2(c) /\
+        cap(t) ~= 0 /\ dt(t) ~= 0
+      end
+    ),
+
+    matchingIds : StopId >< StopId >< Connection -> Bool
+    matchingIds(id1, id2, c) is (
+      (id1(c) = id1 /\ id2(c) = id2) \/ 
+      (id1(c) = id2 /\ id2(c) = id1)
+    )
+
     
  
   value /* predicates to check nets */
     isWellformed : Net -> Bool
     isWellformed(n) is (
-      if n = empty then 
+      if card stops(n) < 2 \/ card conns(n) < 1 then 
         false
       else
-        allStopsAreConnected(stops(n), n)
+        allStopsAreConnected(stops(n), n) /\ noIsoNets(stops(n), n)
       end
     ),
     
@@ -169,21 +174,6 @@ class
           areDirectlyConnected(id(s1), id(s2), n)
       )
     ),
-    
-    allConnectionsAreValid : Connection-set >< Net -> Bool
-    allConnectionsAreValid(cs, n) is (
-      all c : Connection :- c isin cs => (
-        exists s1 : Stop :- s1 isin stops(n) /\ (
-          exists s2 : Stop :- s2 isin stops(n) /\
-          id1(c) = id(s1) /\ id2(c) = id(s2)
-        ) 
-      )
-    ),
-    
-    
-    -- get all the stops in the net
-    getStops : Net -> Stop-set
-    getStops(n) is stops(n),
     
     noIsoNets : Stop-set >< Net -> Bool
     noIsoNets(ss, n) is (
