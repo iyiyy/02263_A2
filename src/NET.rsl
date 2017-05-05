@@ -27,7 +27,9 @@ class
       
   value /* generators */
     empty :  Net = mk_Net({}, {}),  -- the empty net
-
+    emptyStop : Stop = mk_Stop("",0,0),
+    emptyConn : Connection = mk_Connection("","",mk_Track(0,0)),
+    
     -- insert a stop with a given name, capacity and minimum waiting time
     insertStop : StopId >< Capacity >< WaitingTime >< Net -> Net
     insertStop(id, cap, wt, currNet) is (
@@ -54,17 +56,30 @@ class
   value /* observers */
     -- check whether a stop is in a network     
     isIn : StopId >< Net -> Bool
-    isIn(sId, n) is (
-      exists s : Stop :- s isin stops(n) /\ id(s) = sId
+    isIn(sid, n) is (
+      if getStop(sid, n) ~= emptyStop then
+        true
+      else
+        false
+      end
     ),
    
    getStop : StopId >< Net -> Stop
    getStop(sId, n) is (
-     if isIn(sId, n) then
-       hd {s | s : Stop :- s isin stops(n)}
-     else
-       mk_Stop("",0,0)
+     let
+       s = {s | s : Stop :- s isin stops(n) /\ id(s) = sId}
+     in
+       if s = {} then
+         hd s
+       else
+         emptyStop
+       end
      end
+   ),
+   
+   hasData : Stop -> Bool
+   hasData(s) is (
+     id(s) ~= "" /\ cap(s) ~= 0 /\ wt(s) ~=0 
    ),
    
     -- get the capacity of a stop 
@@ -81,12 +96,28 @@ class
     -- check whether two stops are directly connected in a network        
     areDirectlyConnected : StopId >< StopId >< Net -> Bool
     areDirectlyConnected(id1, id2, n) is (
-	  matchingIds(id1, id2, getConnection(id1, id2, n)) 
+      let
+        c = getConnection(id1, id2, n)
+      in
+        if c ~= emptyConn then
+          true
+        else
+          false
+        end
+      end
 	),
 	
    getConnection: StopId >< StopId >< Net -~-> Connection
    getConnection(id1, id2, n) is (
-     hd {c | c : Connection :- c isin conns(n) /\ matchingIds(id1, id2, c) }
+     let
+       c ={c | c : Connection :- c isin conns(n) /\ matchingIds(id1, id2, c)}
+     in
+       if c = {} then
+         emptyConn
+       else
+         hd c
+       end
+     end
    ),
 	
     matchingIds : StopId >< StopId >< Connection -> Bool
@@ -113,12 +144,26 @@ class
       if n = empty then 
         false
       else
-        all s : Stop :- s isin stops(n) => (
-          all c : Connection :- c isin conns(n) => (
-            isWellformed(s) /\ isWellformed(c)
-          )
-        )
+        allStopsAreConnected(stops(n), n)
       end
+    ),
+    
+    allStopsAreConnected : Stop-set >< Net -> Bool
+    allStopsAreConnected(ss, n) is (
+      all s1 : Stop :- s1 isin stops(n) => (
+        exists s2 : Stop :- s2 isin stops(n) /\
+          areDirectlyConnected(id(s1), id(s2), n)
+      )
+    ),
+    
+    allConnectionsAreValid : Connection-set >< Net -> Bool
+    allConnectionsAreValid(cs, n) is (
+      all c : Connection :- c isin cs => (
+        exists s1 : Stop :- s1 isin stops(n) /\ (
+          exists s2 : Stop :- s2 isin stops(n) /\
+          id1(c) = id(s1) /\ id2(c) = id(s2)
+        ) 
+      )
     ),
     
     isWellformed : Stop -> Bool
