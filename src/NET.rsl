@@ -82,6 +82,16 @@ class
      id(s) ~= "" /\ cap(s) ~= 0 /\ wt(s) ~=0 
    ),
    
+    hasData : Connection -> Bool
+    hasData(c) is (
+      let
+        t = t(c)
+      in
+       id1(c) ~= "" /\ id2(c) ~= "" /\ id1(c) ~= id2(c) /\
+        cap(t) ~= 0 /\ dt(t) ~= 0
+      end
+    ),
+
     -- get the capacity of a stop 
     capacity : StopId >< Net -~-> Capacity
     capacity(sId, n) is (
@@ -90,9 +100,9 @@ class
 
     -- get the minimum waiting time of a stop 
     minWaitingTime : StopId >< Net -~-> Time
-	minWaitingTime(sId,n) is (
-	  wt(getStop(sId, n))
-	),
+  minWaitingTime(sId,n) is (
+    wt(getStop(sId, n))
+  ),
     -- check whether two stops are directly connected in a network        
     areDirectlyConnected : StopId >< StopId >< Net -> Bool
     areDirectlyConnected(id1, id2, n) is (
@@ -105,8 +115,8 @@ class
           false
         end
       end
-	),
-	
+  ),
+  
    getConnection: StopId >< StopId >< Net -~-> Connection
    getConnection(id1, id2, n) is (
      let
@@ -119,7 +129,7 @@ class
        end
      end
    ),
-	
+  
     matchingIds : StopId >< StopId >< Connection -> Bool
     matchingIds(id1, id2, c) is (
       (id1(c) = id1 /\ id2(c) = id2) \/ 
@@ -129,10 +139,10 @@ class
     capacity : StopId >< StopId >< Net -~-> Capacity
     capacity(id1, id2, n) is (
       if areDirectlyConnected(id1, id2, n) 
-      	then 
-      		cap(getStop(id1,n))
-      	else 
-      		0
+        then 
+          cap(getStop(id1,n))
+        else 
+          0
       end
     ),
     -- get minimum driving time between two connected stops        
@@ -170,55 +180,21 @@ class
       )
     ),
     
-    isWellformed : Stop -> Bool
-    isWellformed(s) is (
-        id(s) ~= "" /\ cap(s) ~= 0 /\ wt(s) ~=0 
-    ),
-    
-    isWellformed : Connection -> Bool
-    isWellformed(c) is (
-      let
-        t = t(c)
-      in
-       id1(c) ~= "" /\ id2(c) ~= "" /\ id1(c) ~= id2(c) /\
-        cap(t) ~= 0 /\ dt(t) ~= 0
-      end
-    ),
     
     -- get all the stops in the net
     getStops : Net -> Stop-set
-    getStops(n) is stops(n)
+    getStops(n) is stops(n),
     
-  test_case
-    [t0] insertStop("s1", 1, 1, empty),
-    [t1]
-      let
-        currNet = insertStop("s1", 1, 1, empty)
-      in
-        insertStop("s2", 1, 1, currNet)
-      end,
-    [t2]
-      let
-        net = insertStop("s1", 1, 1, insertStop("s2", 1, 1, empty))
-      in
-        addConnection("s1", "s2", 1, 12, net)
-      end,
-    [t3]
-      let
-        currNet = insertStop("s1", 1, 1, empty)
-      in
-        isIn("s1", currNet)
-      end,
-    [t4]
-      let
-        currNet = insertStop("s1", 55, 2221, empty)
-      in
-        capacity("s1", currNet)
-      end,
-    [t5]
-      let
-        currNet = insertStop("s1", 55, 2221, empty)
-      in
-        minWaitingTime("s1", currNet)
+    noIsoNets : Stop-set >< Net -> Bool
+    noIsoNets(ss, n) is (
+      if card ss > 1 then
+        exists s : Stop :- s isin ss /\ (
+          exists otherS : Stop :- otherS isin ss /\ (
+            areDirectlyConnected(id(s), id(otherS), n) /\ noIsoNets(ss \ {s}, n)
+          )
+        )
+      else
+        true
       end
+    )
 end  
