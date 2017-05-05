@@ -102,5 +102,10 @@ class
 	     [NO_ISOLATED_NETS_1] noIsoNets(ss5,n5) = false,
 	     [NO_ISOLATED_NETS_2] noIsoNets(ss6,n6) = false,
 	     [NO_ISOLATED_NETS_3] noIsoNets(ss7,n7) = true,
-	     [NO_ISOLATED_NETS_4] noIsoNets(ss8,n8) = true
+	     [NO_ISOLATED_NETS_4] noIsoNets(ss8,n8) = true,
+	     
+	     [IS_WELLFORMED_NET_1] isWellformed(n1) = false,
+	     [IS_WELLFORMED_NET_2] isWellformed(n5) = false,
+	     [IS_WELLFORMED_NET_3] isWellformed(n4) = true,
+	     [IS_WELLFORMED_NET_4] isWellformed(n8) = true
  end
