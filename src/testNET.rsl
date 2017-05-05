@@ -16,17 +16,52 @@ class
 		trk4 : Track = mk_Track(1,1),
 		  
 		conn1 : Connection = mk_Connection(id(s1), id(s2), trk1),
-		conn2 : Connection = mk_Connection(id(s1), id(s3), trk2),
-		conn3 : Connection = mk_Connection(id(s1), id(s2), trk1),
-		conn4 : Connection = mk_Connection(id(s1), id(s2), trk1),
-		conn5 : Connection = mk_Connection(id(s1), id(s2), trk1),
+		conn2 : Connection = mk_Connection(id(s3), id(s4), trk2),
+		conn3 : Connection = mk_Connection(id(s2), id(s3), trk1),
+		conn4 : Connection = mk_Connection(id(s1), id(s3), trk1),
+		conn5 : Connection = mk_Connection(id(s3), id(s4), trk1),
+		conn6 : Connection = mk_Connection(id(s3), id(s4), trk1),
 		  
-		ss : Stop-set = {s1,s2, s3},
-		  
-		cs : Connection-set = {conn1,conn2},
-		  
-		n : Net = mk_Net(ss,cs)
+		/* [NO_FLOATING_CONNECTIONS_1] */
+		ss1 : Stop-set = {},
+		cs1 : Connection-set = {conn1}, 
+		n1 : Net = mk_Net(ss1,cs1),
+		
+		/* [NO_FLOATING_CONNECTIONS_2] */
+		ss2 : Stop-set = {s1},
+		cs2 : Connection-set = {conn1}, 
+		n2 : Net = mk_Net(ss2,cs2),
+		
+		/* [NO_FLOATING_CONNECTIONS_3] */
+		ss3 : Stop-set = {s2},
+		cs3 : Connection-set = {conn1}, 
+		n3 : Net = mk_Net(ss3,cs3),
+		
+		/* [NO_FLOATING_CONNECTIONS_4] */
+		ss4 : Stop-set = {s1,s2},
+		cs4 : Connection-set = {conn1}, 
+		n4 : Net = mk_Net(ss4,cs4),
   
+  		/* [NO_ISOLATED_NETS_1]*/
+  		ss5 : Stop-set = {s1,s2,s3},
+		cs5 : Connection-set = {conn1}, 
+		n5 : Net = mk_Net(ss5,cs5),
+  		
+   		/* [NO_ISOLATED_NETS_2]*/
+  		ss6 : Stop-set = {s1,s2,s3,s4},
+		cs6 : Connection-set = {conn1,conn2}, 
+		n6 : Net = mk_Net(ss6,cs6),
+		
+  		/* [NO_ISOLATED_NETS_3]*/
+  		ss7 : Stop-set = {s1,s2,s3},
+		cs7 : Connection-set = {conn1,conn3}, 
+		n7 : Net = mk_Net(ss7,cs7),
+		
+  		/* [NO_ISOLATED_NETS_4]*/
+  		ss8 : Stop-set = {s1,s2,s3,s4},
+		cs8 : Connection-set = {conn1,conn4,conn5,conn6}, 
+		n8 : Net = mk_Net(ss8,cs8)
+		
 	test_case
 		[INSERT_STOP_ONE] insertStop("s1", 1, 1, empty),
 		[INSERT_STOP_TWO]
@@ -58,5 +93,14 @@ class
 	        currNet = insertStop("s1", 55, 2221, empty)
 	      in
 	        minWaitingTime("s1", currNet)
-	      end
+	      end,
+	     [NO_FLOATING_CONNECTIONS_1] noFloatingConns(n1) = false,
+	     [NO_FLOATING_CONNECTIONS_2] noFloatingConns(n2) = false,
+	     [NO_FLOATING_CONNECTIONS_3] noFloatingConns(n3) = false,
+	     [NO_FLOATING_CONNECTIONS_4] noFloatingConns(n4) = true,
+	     
+	     [NO_ISOLATED_NETS_1] noIsoNets(ss5,n5) = false,
+	     [NO_ISOLATED_NETS_2] noIsoNets(ss6,n6) = false,
+	     [NO_ISOLATED_NETS_3] noIsoNets(ss7,n7) = true,
+	     [NO_ISOLATED_NETS_4] noIsoNets(ss8,n8) = true
  end
