@@ -1,0 +1,62 @@
+NET
+scheme testNET =
+extend NET with 
+class
+	value	  
+		s1 : Stop = mk_Stop("s1",1,1),
+		s2 : Stop = mk_Stop("s2",1,1),
+		s3 : Stop = mk_Stop("s3",1,1),
+		s4 : Stop = mk_Stop("s4",1,1),
+		s5 : Stop = mk_Stop("s5",1,1),
+		s6 : Stop = mk_Stop("s6",1,1),
+		  
+		trk1 : Track = mk_Track(1,1),
+		trk2 : Track = mk_Track(1,1),
+		trk3 : Track = mk_Track(1,1),
+		trk4 : Track = mk_Track(1,1),
+		  
+		conn1 : Connection = mk_Connection(id(s1), id(s2), trk1),
+		conn2 : Connection = mk_Connection(id(s1), id(s3), trk2),
+		conn3 : Connection = mk_Connection(id(s1), id(s2), trk1),
+		conn4 : Connection = mk_Connection(id(s1), id(s2), trk1),
+		conn5 : Connection = mk_Connection(id(s1), id(s2), trk1),
+		  
+		ss : Stop-set = {s1,s2, s3},
+		  
+		cs : Connection-set = {conn1,conn2},
+		  
+		n : Net = mk_Net(ss,cs)
+  
+	test_case
+		[INSERT_STOP_ONE] insertStop("s1", 1, 1, empty),
+		[INSERT_STOP_TWO]
+		  let
+		    currNet = insertStop("s1", 1, 1, empty)
+		  in
+		    insertStop("s2", 1, 1, currNet)
+		 end,
+	     [ADDCONNECTION]
+	      let
+	        net = insertStop("s1", 1, 1, insertStop("s2", 1, 1, empty))
+	      in
+	        addConnection("s1", "s2", 1, 12, net)
+	      end,
+	    [IS_IN]
+	      let
+	        currNet = insertStop("s1", 1, 1, empty)
+	      in
+	        isIn("s1", currNet)
+	      end,
+	    [CAPACITY]
+	      let
+	        currNet = insertStop("s1", 55, 2221, empty)
+	      in
+	        capacity("s1", currNet)
+	      end,
+	    [MIN_WAITING_TIME]
+	      let
+	        currNet = insertStop("s1", 55, 2221, empty)
+	      in
+	        minWaitingTime("s1", currNet)
+	      end
+ end
