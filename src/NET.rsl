@@ -6,18 +6,18 @@ class
       conns : Connection-set,
    
     Stop ::
-      id : StopId
+      id  : StopId
       cap : Capacity
-      wt : WaitingTime,
+      wt  : WaitingTime,
    
     Track ::
       cap : Capacity
-      dt : DrivingTime,
+      dt  : DrivingTime,
 
     Connection ::
-    id1 : StopId
-    id2 : StopId
-      t : Track,
+      id1 : StopId
+      id2 : StopId
+      t   : Track,
 
     StopId = Text,  -- names of stops
     Capacity = Nat, -- capacities
