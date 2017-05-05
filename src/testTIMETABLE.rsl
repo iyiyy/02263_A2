@@ -1,0 +1,7 @@
+TIMETABLE
+scheme testTIMEABLE =
+extend TIMETABLE with
+class
+	value
+	test_case
+end
