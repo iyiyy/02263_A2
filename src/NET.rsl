@@ -163,15 +163,18 @@ class
       if card stops(n) < 2 \/ card conns(n) < 1 then 
         false
       else
-        allStopsAreConnected(stops(n), n) /\ noIsoNets(stops(n), n)
+        noFloatingConns(n) /\ noIsoNets(stops(n), n)
       end
     ),
     
-    allStopsAreConnected : Stop-set >< Net -> Bool
-    allStopsAreConnected(ss, n) is (
-      all s1 : Stop :- s1 isin stops(n) => (
-        exists s2 : Stop :- s2 isin stops(n) /\
-          areDirectlyConnected(id(s1), id(s2), n)
+    noFloatingConns : Net -> Bool
+    noFloatingConns(n) is (
+      all c : Connection :- c isin conns(n) => (
+        exists s1 : Stop :- s1 isin stops(n) /\ (
+          exists s2 : Stop :- s2 isin stops(n) /\
+            id1(c) = id(s1) /\ id2(c) = id(s2) /\ 
+            hasData(c) /\ hasData(s1) /\ hasData(s2)
+        )
       )
     ),
     
