@@ -113,7 +113,7 @@ class
       let
         s = {s | s : Stop :- s isin stops(n) /\ id(s) = sId}
       in
-        if s = {} then
+        if s ~= {} then
           hd s
         else
           emptyStop
