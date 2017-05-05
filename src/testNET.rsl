@@ -59,4 +59,8 @@ class
 	      in
 	        minWaitingTime("s1", currNet)
 	      end
+  
+  
+  
+  
  end
