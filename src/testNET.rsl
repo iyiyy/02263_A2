@@ -2,26 +2,30 @@ NET
 scheme testNET =
 extend NET with 
 class
-	value	  
+	value
+	/******************************** STOPS ************************************************/	  
 		s1 : Stop = mk_Stop("s1",1,1),
 		s2 : Stop = mk_Stop("s2",1,1),
 		s3 : Stop = mk_Stop("s3",1,1),
 		s4 : Stop = mk_Stop("s4",1,1),
 		s5 : Stop = mk_Stop("s5",1,1),
 		s6 : Stop = mk_Stop("s6",1,1),
-		  
+		
+	/******************************** TRACKS ***********************************************/	  
 		trk1 : Track = mk_Track(1,1),
 		trk2 : Track = mk_Track(1,1),
 		trk3 : Track = mk_Track(1,1),
 		trk4 : Track = mk_Track(1,1),
-		  
+		
+	/******************************** CONNECTIONS ******************************************/	  
 		conn1 : Connection = mk_Connection(id(s1), id(s2), trk1),
 		conn2 : Connection = mk_Connection(id(s3), id(s4), trk2),
 		conn3 : Connection = mk_Connection(id(s2), id(s3), trk1),
 		conn4 : Connection = mk_Connection(id(s1), id(s3), trk1),
 		conn5 : Connection = mk_Connection(id(s3), id(s4), trk1),
 		conn6 : Connection = mk_Connection(id(s3), id(s4), trk1),
-		  
+		
+	/******************************** TESTING SETUP FOR NO_FLOATING_CONNECTIONS ************/	  
 		/* [NO_FLOATING_CONNECTIONS_1] */
 		ss1 : Stop-set = {},
 		cs1 : Connection-set = {conn1}, 
@@ -41,7 +45,8 @@ class
 		ss4 : Stop-set = {s1,s2},
 		cs4 : Connection-set = {conn1}, 
 		n4 : Net = mk_Net(ss4,cs4),
-  
+		
+  	/******************************** TESTING SETUP FOR NO_ISOLATED_NETS ********************/
   		/* [NO_ISOLATED_NETS_1]*/
   		ss5 : Stop-set = {s1,s2,s3},
 		cs5 : Connection-set = {conn1}, 
