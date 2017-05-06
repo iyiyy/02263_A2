@@ -162,17 +162,37 @@ class
     matchingIds(id1, id2, c) is (
       (id1(c) = id1 /\ id2(c) = id2) \/ 
       (id1(c) = id2 /\ id2(c) = id1)
-    )
+    ),
 
-    
- 
+    allStopsLegal : Net -> Bool
+ 	allStopsLegal(n) is (
+ 		let
+ 			ss = stops(n)
+ 		in
+ 			all s1 : Stop :- s1 isin ss => (
+ 				~(exists s2: Stop :- s2 isin ss /\ id(s1) = id(s2) /\ s1 ~= s2)
+ 			)
+ 		end
+ 	),
+ 	
+    allConnectionsLegal : Net -> Bool
+ 	allConnectionsLegal(n) is (
+ 		let
+ 			cs = conns(n)
+ 		in
+ 			all c1 : Connection :- c1 isin cs => (
+ 				~(exists c2: Connection :- c2 isin cs /\ matchingIds(id1(c1), id2(c2), c1) /\ c1 ~= c2) 
+ 			)
+ 		end
+ 	)
+ 	
   value /* predicates to check nets */
     isWellformed : Net -> Bool
     isWellformed(n) is (
       if card stops(n) < 2 \/ card conns(n) < 1 then 
         false
       else
-        noFloatingConns(n) /\ noIsoNets(stops(n), n)
+        noFloatingConns(n) /\ noIsoNets(stops(n), n) /\ allStopsLegal(n) /\ allConnectionsLegal(n)
       end
     ),
     

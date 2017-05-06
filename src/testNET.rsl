@@ -10,12 +10,14 @@ class
 		s4 : Stop = mk_Stop("s4",1,1),
 		s5 : Stop = mk_Stop("s5",1,1),
 		s6 : Stop = mk_Stop("s6",1,1),
+		s7 : Stop = mk_Stop("s1",2,1),
+		s8 : Stop = mk_Stop("s1",1,2),
 		
 	/******************************** TRACKS ***********************************************/	  
 		trk1 : Track = mk_Track(1,1), -- cap, dt
 		trk2 : Track = mk_Track(1,1),
 		trk3 : Track = mk_Track(1,1),
-		trk4 : Track = mk_Track(1,1),
+		trk4 : Track = mk_Track(2,2),
 		
 	/******************************** CONNECTIONS ******************************************/	  
 		conn1 : Connection = mk_Connection(id(s1), id(s2), trk1),
@@ -23,7 +25,8 @@ class
 		conn3 : Connection = mk_Connection(id(s2), id(s3), trk1),
 		conn4 : Connection = mk_Connection(id(s1), id(s3), trk1),
 		conn5 : Connection = mk_Connection(id(s3), id(s4), trk1),
-		conn6 : Connection = mk_Connection(id(s3), id(s4), trk1),
+		conn6 : Connection = mk_Connection(id(s3), id(s4), trk4),
+		
 		
 	/******************************** TESTING SETUP FOR NO_FLOATING_CONNECTIONS ************/	  
 		/* [NO_FLOATING_CONNECTIONS_1] */
@@ -66,19 +69,34 @@ class
   		ss8 : Stop-set = {s1,s2,s3,s4},
 		cs8 : Connection-set = {conn1,conn4,conn5,conn6}, 
 		n8 : Net = mk_Net(ss8,cs8),
+	/******************************** TESTING SETUP FOR IS_WELLFORMED ***********************/	
+ 		ss9 : Stop-set = {s1,s2},
+		cs9 : Connection-set = {conn1}, 
+		n9 : Net = mk_Net(ss9,cs9),
 		
+	/******************************* TESTING SETUP FOR LEGAL_STOP ***************************/
+		ss10 : Stop-set = {s1,s7},
+		cs10: Connection-set = {conn1}, 
+		n10 : Net = mk_Net(ss10, cs10),
 		
-		csTemp : Connection-set = {conn2,conn5}
+		ss11 : Stop-set = {s1,s2},
+		cs11: Connection-set = {conn1}, 
+		n11 : Net = mk_Net(ss11, cs11),
+		
+	/******************************* TESTING SETUP FOR LEGAL_CONNECTION *********************/	
+		ss12 : Stop-set = {s1,s2},
+		cs12: Connection-set = {conn5, conn6}, 
+		n12 : Net = mk_Net(ss12, cs12),
+		
+		ss13 : Stop-set = {s1,s2},
+		cs13: Connection-set = {conn5}, 
+		n13 : Net = mk_Net(ss13, cs13)
+	
 	test_case
-		[temp01] card cs8,
-		[temp02] card csTemp,
-		[INSERT_STOP_ONE] 
-			let 
-				n = insertStop("s1", 1, 1, empty),
-				n = insertStop("s1", 2, 2, n)
-			in
-				n
-			end,
+		[LEGAL_STOP_1] allStopsLegal(n10) = false,
+		[LEGAL_STOP_2] allStopsLegal(n11),
+		[LEGAL_CONNECTION_1] allConnectionsLegal(n12) = false,
+		[LEGAL_CONNECTION_2] allConnectionsLegal(n13),
 		[INSERT_STOP_TWO]
 		  let
 		    currNet = insertStop("s1", 1, 1, empty)
@@ -107,8 +125,6 @@ class
 		[NO_ISOLATED_NETS_2] noIsoNets(ss6,n6) = false,
 		[NO_ISOLATED_NETS_3] noIsoNets(ss7,n7) = true,
 		[NO_ISOLATED_NETS_4] noIsoNets(ss8,n8) = true,
-		[IS_WELLFORMED_NET_1] isWellformed(n1) = false,
-		[IS_WELLFORMED_NET_2] isWellformed(n5) = false,
-		[IS_WELLFORMED_NET_3] isWellformed(n4) = true,
-		[IS_WELLFORMED_NET_4] isWellformed(n8) = true
+		[IS_WELLFORMED_NET_1] isWellformed(n9) = true
+
  end
