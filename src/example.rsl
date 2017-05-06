@@ -1,0 +1,122 @@
+TIMETABLE
+scheme example = extend TIMETABLE with
+class
+  value
+    A : Stop = mk_Stop("A",2,1),
+    B : Stop = mk_Stop("B",3,2),
+    C : Stop = mk_Stop("C",2,1),
+    D : Stop = mk_Stop("D",2,1),
+    tAB : Track = mk_Track(1, 10),
+    tBC : Track = mk_Track(2, 12),
+    tBD : Track = mk_Track(3, 7),
+    cAB : Connection = mk_Connection(id(A), id(B), tAB),
+    cBC : Connection = mk_Connection(id(B), id(C), tBC),
+    cBD : Connection = mk_Connection(id(B), id(D), tBD),
+    ss : Stop-set = {A,B,C,D},
+    cs : Connection-set = {cAB, cBC, cBD},
+    n : Net = mk_Net(ss, cs),
+    
+    tram1 : TramId = "tram1",
+    t11 : Trip = mk_Trip(id(A), 0, 1),
+    t12 : Trip = mk_Trip(id(B), 12, 14),
+    t13 : Trip = mk_Trip(id(C), 28, 32),
+    t14 : Trip = mk_Trip(id(B), 46, 48),
+    t15 : Trip = mk_Trip(id(A), 59, 60),
+    p1 : Plan = <.t11, t12, t13, t14, t15.>,
+    
+    tram2 : TramId = "tram2",
+    t21 : Trip = mk_Trip(id(D), 0, 2),
+    t22 : Trip = mk_Trip(id(B), 10, 13),
+    t23 : Trip = mk_Trip(id(A), 28, 32),
+    t24 : Trip = mk_Trip(id(B), 47, 50),
+    t25 : Trip = mk_Trip(id(D), 58, 60),
+    p2 : Plan = <.t21, t22, t23, t24, t25.>,
+    
+    tt : TimeTable = [tram1 +> p1, tram2 +> p2],
+
+    checkCollisions : TimeTable -> Bool
+    checkCollisions(tt) is (
+      true
+    ),
+    
+    combineAllPlans : TimeTable -> Plan
+    combineAllPlans(tt) is (
+      local
+        variable
+          ps : Plan-set := rng tt,
+          totalPlan : Plan := <..>
+      in
+        while ps ~= {} do 
+          totalPlan := totalPlan ^ hd ps;
+          ps := ps \ {hd ps}
+        end;
+      totalPlan
+      end
+    ),
+    
+    --stationCapViol : Trip-set >< Nat -> Bool
+    --stationCapViol(ts, n) is (
+      --if ts = {} then
+        --false
+      --else
+        --all t : 
+      --end
+    --),
+    
+    trackCapViol : Trip-set >< Net >< Plan -> Bool
+    trackCapViol(ts, n, p) is (
+      if ts = {} then
+        false
+      else
+        let
+          cs = getConnections(id(hd ts), n)
+        in
+          exists c : Connection :- c isin cs /\ (
+            exists t : Trip :- t isin ts /\
+              let
+                destinations = {t1 | t1 : Trip :- t1 isin p /\ ((dept(t) + dt(t(c))) >= arrt(t1))
+                /\ ~(areDirectlyConnected(id(t1), id1(c), n) \/ areDirectlyConnected(id(t1), id2(c), n))}
+              in
+                card destinations >= cap(t(c))
+              end
+            )
+        end
+      end
+    ),    
+    
+    tmp : Plan -> Trip-set
+    tmp(p) is {t | t : Trip :- t isin combineAllPlans(tt) /\ id(t) = "B"},   
+    
+    newWffPlan : Plan -> Bool
+    newWffPlan(p) is (
+      all t1 : Trip :- t1 isin p => (
+        let
+          s = getStop(id(t1), n),
+          cap = cap(s),
+          wt = wt(s),
+          sameStations = {t2 | t2 : Trip :- t2 isin p /\ id(t2) = id(t1)},
+          possibleArrConflicts = {t2 | t2 : Trip :- t2 isin sameStations /\ dept(t1) >= arrt(t2) /\ dept(t1) - arrt(t2) < wt},
+          possibleDepConflicts = {t2 | t2 : Trip :- t2 isin sameStations /\ dept(t1) >= dept(t2)}
+        in
+          card possibleArrConflicts <= cap /\ ~trackCapViol(possibleDepConflicts, n, p)
+        end
+      )
+    )
+     
+   test_case
+    [t0] {t2 | t2 : Trip :- t2 isin tmp(combineAllPlans(tt)) /\ 48 >= arrt(t2) /\ 48 - arrt(t2) < 2},
+    [t1] newWffPlan(combineAllPlans(tt))
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+end

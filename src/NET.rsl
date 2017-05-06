@@ -142,6 +142,11 @@ class
         end
       end
     ),
+    
+    getConnections: StopId >< Net -> Connection-set
+    getConnections(id, n) is (
+      {c | c : Connection :- c isin conns(n) /\ (id1(c) = id \/ id2(c) = id)}
+    ),
 
     hasData : Stop -> Bool
     hasData(s) is (
