@@ -37,7 +37,7 @@ class
       let
         newStop = mk_Stop(id, cap, wt)
       in
-        mk_Net(stops(currNet) union {newStop}, conns(currNet))
+ 		mk_Net(stops(currNet) union {newStop}, conns(currNet))
       end
     ),
     
@@ -62,6 +62,15 @@ class
       else
         false
       end
+    ),
+    
+    isIn : StopId >< StopId >< Net -> Bool
+    isIn(id1, id2, n) is (
+    	let 
+    	  c = getConnection(id1, id2, n)
+    	in
+    	  matchingIds(id1,id2,c)
+    	end
     ),
 
     -- get the capacity of a stop 

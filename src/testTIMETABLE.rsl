@@ -1,7 +1,35 @@
 TIMETABLE
-scheme testTIMEABLE =
+scheme testTIMETABLE =
 extend TIMETABLE with
 class
 	value
+	/******************************** TRIPS ************************************************/
+		trip1 : Trip = mk_Trip("A", 0, 1), -- minWaiting time 1 min travel time 1 min, A -> B
+		trip2 : Trip = mk_Trip("B", 1, 3), -- minWaiting time 2 min travel time 2 min B -> C
+		trip3 : Trip = mk_Trip("C", 5, 8), -- minWaiting time 3 min travel time 2 min C -> B
+		trip4 : Trip = mk_Trip("B", 10, 12), -- minWaiting time 2 min travel time 2 min B -> A
+		trip5 : Trip = mk_Trip("A", 11, 13), -- minWaiting time 1 min travel time 1 min A -> B
+		trip6 : Trip = mk_Trip("B", 0, 1), -- minWaiting time 1 min travel time 3 min B -> D
+		trip7 : Trip = mk_Trip("D", 4, 7), -- minWaiting time 3 min travel time 3 min D -> B
+	
+	/******************************** PLANS ************************************************/
+		plan1 : Plan = <.trip1, trip2, trip3, trip4, trip5, trip6, trip7.>, -- Plan with all trips A->B->C->B->A->B and B <-> D 
+		plan2 : Plan = <.trip1.>, -- Plan with one trip A -> B
+		plan3 : Plan = <.trip1, trip3.>, -- Plan with two trips A -> B, C -> B
+
+	/******************************** TIMETABLE ************************************************/
+		timeTable1 : TimeTable = ["tram1" +> plan1],
+		timeTable2 : TimeTable = ["tram2" +> plan2],
+		timeTable3 : TimeTable = ["tram3" +> plan3]
+	
 	test_case
+	[ADD_TRAM] addTram("t1", empty),
+    [ADD_STOP] 
+      let 
+        m = ["t1" +> <..>, "t2" +> <.mk_Trip("s1", 0, 2).>]
+      in
+        addStop("t1", "s2", 0, 2, m)
+      end,
+	[IS_IN_1] isIn("tram1", timeTable1) = true,
+	[IS_IN_2] isIn("tram1", timeTable2) = false
 end

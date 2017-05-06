@@ -4,7 +4,7 @@ extend NET with
 class
 	value
 	/******************************** STOPS ************************************************/	  
-		s1 : Stop = mk_Stop("s1",1,1),
+		s1 : Stop = mk_Stop("s1",1,1), -- stopId, cap, wt
 		s2 : Stop = mk_Stop("s2",1,1),
 		s3 : Stop = mk_Stop("s3",1,1),
 		s4 : Stop = mk_Stop("s4",1,1),
@@ -12,7 +12,7 @@ class
 		s6 : Stop = mk_Stop("s6",1,1),
 		
 	/******************************** TRACKS ***********************************************/	  
-		trk1 : Track = mk_Track(1,1),
+		trk1 : Track = mk_Track(1,1), -- cap, dt
 		trk2 : Track = mk_Track(1,1),
 		trk3 : Track = mk_Track(1,1),
 		trk4 : Track = mk_Track(1,1),
@@ -65,52 +65,50 @@ class
   		/* [NO_ISOLATED_NETS_4]*/
   		ss8 : Stop-set = {s1,s2,s3,s4},
 		cs8 : Connection-set = {conn1,conn4,conn5,conn6}, 
-		n8 : Net = mk_Net(ss8,cs8)
+		n8 : Net = mk_Net(ss8,cs8),
 		
+		
+		csTemp : Connection-set = {conn2,conn5}
 	test_case
-		[INSERT_STOP_ONE] insertStop("s1", 1, 1, empty),
+		[temp01] card cs8,
+		[temp02] card csTemp,
+		[INSERT_STOP_ONE] 
+			let 
+				n = insertStop("s1", 1, 1, empty),
+				n = insertStop("s1", 2, 2, n)
+			in
+				n
+			end,
 		[INSERT_STOP_TWO]
 		  let
 		    currNet = insertStop("s1", 1, 1, empty)
 		  in
 		    insertStop("s2", 1, 1, currNet)
 		 end,
-	     [ADDCONNECTION]
+	    [ADDCONNECTION]
 	      let
 	        net = insertStop("s1", 1, 1, insertStop("s2", 1, 1, empty))
 	      in
 	        addConnection("s1", "s2", 1, 12, net)
 	      end,
-	    [IS_IN]
-	      let
-	        currNet = insertStop("s1", 1, 1, empty)
-	      in
-	        isIn("s1", currNet)
-	      end,
-	    [CAPACITY]
-	      let
-	        currNet = insertStop("s1", 55, 2221, empty)
-	      in
-	        capacity("s1", currNet)
-	      end,
-	    [MIN_WAITING_TIME]
-	      let
-	        currNet = insertStop("s1", 55, 2221, empty)
-	      in
-	        minWaitingTime("s1", currNet)
-	      end,
-	     [NO_FLOATING_CONNECTIONS_1] noFloatingConns(n1) = false,
-	     [NO_FLOATING_CONNECTIONS_2] noFloatingConns(n2) = false,
-	     [NO_FLOATING_CONNECTIONS_3] noFloatingConns(n3) = false,
-	     [NO_FLOATING_CONNECTIONS_4] noFloatingConns(n4) = true,
-	     
-	     [NO_ISOLATED_NETS_1] noIsoNets(ss5,n5) = false,
-	     [NO_ISOLATED_NETS_2] noIsoNets(ss6,n6) = false,
-	     [NO_ISOLATED_NETS_3] noIsoNets(ss7,n7) = true,
-	     [NO_ISOLATED_NETS_4] noIsoNets(ss8,n8) = true,
-	     
-	     [IS_WELLFORMED_NET_1] isWellformed(n1) = false,
-	     [IS_WELLFORMED_NET_2] isWellformed(n5) = false,
-	     [IS_WELLFORMED_NET_3] isWellformed(n4) = true,
-	     [IS_WELLFORMED_NET_4] isWellformed(n8) = true
+		[IS_IN_STOP_1] isIn("s4", n6) = true,
+		[IS_IN_STOP_2] isIn("s5", n8) = false,
+		[IS_IN_CONNECTION_1] isIn("s1","s2", n5) = true,
+		[IS_IN_CONNECTION_2] isIn("s2","s5", n8) = false,
+		[CAPACITY_1] capacity("s1", n1) = 0,
+		[CAPACITY_2] capacity("s1", n2) = 1,
+		[MIN_WAITING_TIME_1] minWaitingTime("s1", n1) = 0,
+		[MIN_WAITING_TIME_2] minWaitingTime("s1", n5) = 1,
+		[NO_FLOATING_CONNECTIONS_1] noFloatingConns(n1) = false,
+		[NO_FLOATING_CONNECTIONS_2] noFloatingConns(n2) = false,
+		[NO_FLOATING_CONNECTIONS_3] noFloatingConns(n3) = false,
+		[NO_FLOATING_CONNECTIONS_4] noFloatingConns(n4) = true, 
+		[NO_ISOLATED_NETS_1] noIsoNets(ss5,n5) = false,
+		[NO_ISOLATED_NETS_2] noIsoNets(ss6,n6) = false,
+		[NO_ISOLATED_NETS_3] noIsoNets(ss7,n7) = true,
+		[NO_ISOLATED_NETS_4] noIsoNets(ss8,n8) = true,
+		[IS_WELLFORMED_NET_1] isWellformed(n1) = false,
+		[IS_WELLFORMED_NET_2] isWellformed(n5) = false,
+		[IS_WELLFORMED_NET_3] isWellformed(n4) = true,
+		[IS_WELLFORMED_NET_4] isWellformed(n8) = true
  end
