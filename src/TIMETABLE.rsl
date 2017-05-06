@@ -40,62 +40,38 @@ class
      --...
  
   value /* predicates to check time tables */   
-     isWellformed : TimeTable >< Net -> Bool
-     isWellformed(t, n) is (
-        true
-     )
-     
-     
-/*is_sorted : Int-list -> Bool
-is_sorted(l) is (
-  all idx1 : Nat :- idx1 isin inds l => (
-    exists idx2 : Nat :- idx2 isin inds l /\
-      idx2 - idx1 <= 1 /\ l(idx1) <= l(idx2))
+    isWellformed : TimeTable >< Net -> Bool
+    isWellformed(t, n) is (
+      true
     ),
-     
-     wffPlan : Plan >< Net -> Nat
-     wffPlan(p, n) is (
-       local
-         value
-         l : Nat = len p,
-         i : Nat = 1,
-         j : Nat = 2,
-         s1 : Stop = getStop(id(p(i)), n),
-         s2 : Stop = getStop(id(p(j)), n),
-         c : Connection = getConnection(id(s1), id(s2), n)
-       in
-         do
-           j = j + 1
-         until
-           j - (len p) = 1
-         end;
-         j
-       end
-     )
-*/
-     --...
-  test_case
-    [t0] addTram("t1", empty),
-    [t1] 
-      let 
-        m = ["t1" +> <..>, "t2" +> <.mk_Trip("s1", 0, 2).>]
+    
+    consistent : Plan >< Net -> Bool
+    consistent(p, n) is (
+      local
+        variable
+          i : Nat := 1,
+          j : Nat := 2,
+          b1 : Bool := true,
+          b2 : Bool := true,
+          stp1 : Stop := emptyStop,
+          stp2 : Stop := emptyStop,
+          c : Connection := emptyConn
       in
-        addStop("t1", "s2", 0, 2, m)
-      end,
-    [t2]
-      let
-        s1 = mk_Stop("s1", 2, 2),
-        s2 = mk_Stop("s2", 1, 1),
-        s3 = mk_Stop("s3", 1, 1),
-        c12 = mk_Connection("s1", "s2", mk_Track(1,1)),
-        c13 = mk_Connection("s1", "s3", mk_Track(1,1)),
-        n = mk_Net({s1,s2,s3}, {c12,c13}),
-        tr1 = mk_Trip("s1", 0, 2),
-        tr2 = mk_Trip("s2", 3, 4),
-        tr3 = mk_Trip("s1", 5, 7),
-        p = <.tr1, tr2, tr3.>
-      in
-        isWellformed(n)
+        while j <= len p /\ b1 ~= false /\ b2 ~= false do
+          stp1 := getStop(id(p(i)), n);
+          stp2 := getStop(id(p(j)), n);
+          c := getConnection(id(stp1), id(stp2), n);
+          if hasData(c) then
+            b1 := dept(p(i)) - arrt(p(i)) >= wt(stp1);
+            b2 := arrt(p(j)) - dept(p(i)) >= dt(t(c)); --drive time violated?
+            i := i + 1;
+            j := j + 1
+          else
+            b1 := false;
+            b2 := false
+          end
+        end;
+        b1 /\ b2
       end
-     
+    )
 end  
