@@ -3,7 +3,7 @@ scheme testTIMETABLE =
 extend TIMETABLE with
 class
 	value
-	/******************************** TRIPS ************************************************/
+	/* TRIPS */
 		trip1 : Trip = mk_Trip("A", 0, 1), -- minWaiting time 1 min travel time 1 min, A -> B
 		trip2 : Trip = mk_Trip("B", 1, 3), -- minWaiting time 2 min travel time 2 min B -> C
 		trip3 : Trip = mk_Trip("C", 5, 8), -- minWaiting time 3 min travel time 2 min C -> B
@@ -12,12 +12,12 @@ class
 		trip6 : Trip = mk_Trip("B", 0, 1), -- minWaiting time 1 min travel time 3 min B -> D
 		trip7 : Trip = mk_Trip("D", 4, 7), -- minWaiting time 3 min travel time 3 min D -> B
 	
-	/******************************** PLANS ************************************************/
-		plan1 : Plan = <.trip1, trip2, trip3, trip4, trip5, trip6, trip7.>, -- Plan with all trips A->B->C->B->A->B and B <-> D 
+	/* PLANS */
+		plan1 : Plan = <.trip1, trip2, trip3, trip4, trip5, trip6, trip7.>, -- Plan with all trips 
 		plan2 : Plan = <.trip1.>, -- Plan with one trip A -> B
 		plan3 : Plan = <.trip1, trip3.>, -- Plan with two trips A -> B, C -> B
 
-	/******************************** TIMETABLE ************************************************/
+	/* TIMETABLE */
 		timeTable1 : TimeTable = ["tram1" +> plan1],
 		timeTable2 : TimeTable = ["tram2" +> plan2],
 		timeTable3 : TimeTable = ["tram3" +> plan3]
