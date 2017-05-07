@@ -100,18 +100,6 @@ class
 		[LEGAL_STOP_2] allStopsLegal(n11),
 		[LEGAL_CONNECTION_1] allConnectionsLegal(n12) = false,
 		[LEGAL_CONNECTION_2] allConnectionsLegal(n13),
-		[INSERT_STOP_TWO]
-		  let
-		    currNet = insertStop("s1", 1, 1, empty)
-		  in
-		    insertStop("s2", 1, 1, currNet)
-		 end,
-	    [ADDCONNECTION]
-	      let
-	        net = insertStop("s1", 1, 1, insertStop("s2", 1, 1, empty))
-	      in
-	        addConnection("s1", "s2", 1, 12, net)
-	      end,
 		[IS_IN_STOP_1] isIn("s4", n6) = true,
 		[IS_IN_STOP_2] isIn("s5", n8) = false,
 		[IS_IN_CONNECTION_1] isIn("s1","s2", n5) = true,
