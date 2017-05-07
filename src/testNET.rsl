@@ -3,7 +3,7 @@ scheme testNET =
 extend NET with 
 class
 	value
-	/******************************** STOPS ************************************************/	  
+	/* STOPS */	  
 		s1 : Stop = mk_Stop("s1",1,1), -- stopId, cap, wt
 		s2 : Stop = mk_Stop("s2",1,1),
 		s3 : Stop = mk_Stop("s3",1,1),
@@ -13,13 +13,13 @@ class
 		s7 : Stop = mk_Stop("s1",2,1),
 		s8 : Stop = mk_Stop("s1",1,2),
 		
-	/******************************** TRACKS ***********************************************/	  
+	/* TRACKS */	  
 		trk1 : Track = mk_Track(1,1), -- cap, dt
 		trk2 : Track = mk_Track(1,1),
 		trk3 : Track = mk_Track(1,1),
 		trk4 : Track = mk_Track(2,2),
 		
-	/******************************** CONNECTIONS ******************************************/	  
+	/* CONNECTIONS */	  
 		conn1 : Connection = mk_Connection(id(s1), id(s2), trk1),
 		conn2 : Connection = mk_Connection(id(s3), id(s4), trk2),
 		conn3 : Connection = mk_Connection(id(s2), id(s3), trk1),
@@ -28,7 +28,8 @@ class
 		conn6 : Connection = mk_Connection(id(s3), id(s4), trk4),
 		
 		
-	/******************************** TESTING SETUP FOR NO_FLOATING_CONNECTIONS ************/	  
+	/* TESTING SETUP FOR NO_FLOATING_CONNECTIONS */
+		  
 		/* [NO_FLOATING_CONNECTIONS_1] */
 		ss1 : Stop-set = {},
 		cs1 : Connection-set = {conn1}, 
@@ -49,7 +50,8 @@ class
 		cs4 : Connection-set = {conn1}, 
 		n4 : Net = mk_Net(ss4,cs4),
 		
-  	/******************************** TESTING SETUP FOR NO_ISOLATED_NETS ********************/
+  	/* TESTING SETUP FOR NO_ISOLATED_NETS */
+  	
   		/* [NO_ISOLATED_NETS_1]*/
   		ss5 : Stop-set = {s1,s2,s3},
 		cs5 : Connection-set = {conn1}, 
@@ -69,12 +71,13 @@ class
   		ss8 : Stop-set = {s1,s2,s3,s4},
 		cs8 : Connection-set = {conn1,conn4,conn5,conn6}, 
 		n8 : Net = mk_Net(ss8,cs8),
-	/******************************** TESTING SETUP FOR IS_WELLFORMED ***********************/	
+		
+	/* TESTING SETUP FOR IS_WELLFORMED */	
  		ss9 : Stop-set = {s1,s2},
 		cs9 : Connection-set = {conn1}, 
 		n9 : Net = mk_Net(ss9,cs9),
 		
-	/******************************* TESTING SETUP FOR LEGAL_STOP ***************************/
+	/* TESTING SETUP FOR LEGAL_STOP */
 		ss10 : Stop-set = {s1,s7},
 		cs10: Connection-set = {conn1}, 
 		n10 : Net = mk_Net(ss10, cs10),
@@ -83,7 +86,7 @@ class
 		cs11: Connection-set = {conn1}, 
 		n11 : Net = mk_Net(ss11, cs11),
 		
-	/******************************* TESTING SETUP FOR LEGAL_CONNECTION *********************/	
+	/* TESTING SETUP FOR LEGAL_CONNECTION */	
 		ss12 : Stop-set = {s1,s2},
 		cs12: Connection-set = {conn5, conn6}, 
 		n12 : Net = mk_Net(ss12, cs12),
