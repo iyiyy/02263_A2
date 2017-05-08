@@ -95,7 +95,7 @@ class
     capacity : StopId >< StopId >< Net -~-> Capacity
     capacity(id1, id2, n) is (
       if areDirectlyConnected(id1, id2, n) then 
-        cap(getConnection(id1, id2, n))
+        cap(t(getConnection(id1, id2, n)))
       else 
         0
       end
@@ -186,10 +186,8 @@ class
           ~(exists c2: Connection :- c2 isin cs /\ matchingIds(id1(c1), id2(c2), c1) /\ c1 ~= c2) 
         )
       end
-    )
-
-  value /* predicates to check nets */
-    isWellformed : Net -> Bool
+    ),
+    
     noIsoNets : Stop-set >< Net -> Bool
     noIsoNets(ss, n) is (
       if card ss > 1 then
@@ -201,7 +199,11 @@ class
       else
         true
      end
-    ),
+    )
+
+  value /* predicates to check nets */
+    isWellformed : Net -> Bool
+
     
     isWellformed(n) is (
       if card stops(n) < 2 \/ card conns(n) < 1 then 
