@@ -166,6 +166,7 @@ class
       (id1(c) = id2 /\ id2(c) = id1)
     ),
 
+    -- checks that there are no two stops with the same id
     allStopsLegal : Net -> Bool
     allStopsLegal(n) is (
       let
@@ -177,6 +178,7 @@ class
       end
     ),
 
+    -- checks that there are no two connections with the same id
     allConnectionsLegal : Net -> Bool
     allConnectionsLegal(n) is (
       let
@@ -188,6 +190,7 @@ class
       end
     ),
     
+    -- checks that there are no stops that cannot reach any other stop
     noIsoNets : Stop-set >< Net -> Bool
     noIsoNets(ss, n) is (
       if card ss > 1 then
@@ -202,17 +205,18 @@ class
     )
 
   value /* predicates to check nets */
+    -- checks that a net is well formed in terms of the number of stops and connections
+    -- and that no requirements are violated
     isWellformed : Net -> Bool
-
-    
     isWellformed(n) is (
       if card stops(n) < 2 \/ card conns(n) < 1 then 
         false
       else
-        noFloatingConns(n) /\ noIsoNets(stops(n), n) /\ allStopsLegal(n) /\ allConnectionsLegal(n)
+        allStopsLegal(n) /\ allConnectionsLegal(n) /\ noFloatingConns(n) /\ noIsoNets(stops(n), n)
       end
     ),
-
+    
+    -- checks that all connections have a stop at each end
     noFloatingConns : Net -> Bool
     noFloatingConns(n) is (
       all c : Connection :- c isin conns(n) => (
