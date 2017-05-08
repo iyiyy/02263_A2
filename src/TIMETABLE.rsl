@@ -1,58 +1,72 @@
-	NET
+NET
 scheme TIMETABLE = extend NET with
 class
   type 
+    Trip ::
+      id : StopId
+      arrt : Time
+      dept : Time, -- a trip in a time table
+    
     TimeTable = TramId -m-> Plan, -- time tables as a map
-    TramId = Text, -- tram names
-	Trip ::
-	  id : StopId
-	  arrt : Time
-	  dept : Time, -- a trip in a time table
-	Plan = Trip-list -- a list of trips 
-    value /* generators */
-      -- the empty timetable
-      empty: TimeTable = [],
+    Plan = Trip-list, -- a list of trips 
+    TramId = Text -- tram names
 
-      -- add to a time table an empty plan for a new tram
-      addTram: TramId >< TimeTable -> TimeTable
-      addTram(tid, tt) is (
-        tt !! [tid +> <..>]
-      ),
+  value /* generators */
+    -- the empty timetable
+    empty: TimeTable = [],
 
-      -- add a stop with arrival time and departure time to the plan for a given tram
-      addStop: TramId >< StopId >< Time >< Time >< TimeTable -> TimeTable
-      addStop(tid, sid, arrt, dept, tt) is (
-        tt !! [tid +> getPlan(tid, tt) ^ <.mk_Trip(sid, arrt, dept).>]
-      ),
-      
-      getPlan : TramId >< TimeTable -~-> Plan
-      getPlan(tid, tt) is (
-        hd rng (tt / {tid})
-      )
-      -- get
-  value /* observers */
-     -- check whether a tram with a given name exists in a given time table
-     isIn : TramId >< TimeTable -> Bool
-     isIn(tid, tt) is (
-       tid isin tt
-     ),
-     -- you can add more observers here
-     --...
+    -- add to a time table an empty plan for a new tram
+    addTram: TramId >< TimeTable -> TimeTable
+    addTram(tid, tt) is (
+      tt !! [tid +> <..>]
+    ),
+
+    -- add a stop with arrival time and departure time to the plan for a given tram
+    addStop: TramId >< StopId >< Time >< Time >< TimeTable -> TimeTable
+    addStop(tid, sid, arrt, dept, tt) is (
+      tt !! [tid +> getPlan(tid, tt) ^ <.mk_Trip(sid, arrt, dept).>]
+    ),
+
+    -- return the plan for a tram or an empty plan
+    getPlan : TramId >< TimeTable -> Plan
+    getPlan(tid, tt) is (
+      let
+        ps = rng (tt / {tid})
+      in
+        if ps ~= {} then
+          hd ps
+        else
+          <..>
+        end
+      end
+    )
+
+    value /* observers */
+    -- check whether a tram with a given name exists in a given time table
+    isIn : TramId >< TimeTable -> Bool
+    isIn(tid, tt) is (
+      tid isin tt
+    ),
+
+    -- combines all the plans for all the trams into a single plan
     combineAllPlans : TimeTable -> Plan
     combineAllPlans(tt) is (
       local
         variable
           ps : Plan-set := rng tt,
           totalPlan : Plan := <..>
-      in
-        while ps ~= {} do 
-          totalPlan := totalPlan ^ hd ps;
-          ps := ps \ {hd ps}
+        in
+          while ps ~= {} do 
+            totalPlan := totalPlan ^ hd ps;
+            ps := ps \ {hd ps}
         end;
-      totalPlan
+        totalPlan
       end
     ),
-    
+
+    -- checks if a plan is consistent in terms of
+    -- respecting the minimum wait time for the current stop
+    -- and minimum drive time for the track to the next stop
     consistent : Plan >< Net -> Bool
     consistent(p, n) is (
       local
@@ -64,25 +78,27 @@ class
           stp1 : Stop := emptyStop,
           stp2 : Stop := emptyStop,
           c : Connection := emptyConn
-      in
-        while j <= len p /\ b1 ~= false /\ b2 ~= false do
-          stp1 := getStop(id(p(i)), n);
-          stp2 := getStop(id(p(j)), n);
-          c := getConnection(id(stp1), id(stp2), n);
-          if hasData(c) then
-            b1 := dept(p(i)) - arrt(p(i)) >= wt(stp1);
-            b2 := arrt(p(j)) - dept(p(i)) >= dt(t(c)); --drive time violated?
-            i := i + 1;
-            j := j + 1
-          else
-            b1 := false;
-            b2 := false
-          end
-        end;
-        b1 /\ b2
-      end
+        in
+          while j <= len p /\ b1 ~= false /\ b2 ~= false do
+            stp1 := getStop(id(p(i)), n);
+            stp2 := getStop(id(p(j)), n);
+            c := getConnection(id(stp1), id(stp2), n);
+            if hasData(c) then
+              b1 := dept(p(i)) - arrt(p(i)) >= wt(stp1); --wait time violated?
+              b2 := arrt(p(j)) - dept(p(i)) >= dt(t(c)); --drive time violated?
+              i := i + 1;
+              j := j + 1
+            else
+              b1 := false;
+              b2 := false
+            end
+          end;
+          b1 /\ b2
+        end
     ),
     
+    -- check that all the plans in the timetable are
+    -- consistent according to @consistent
     allPlansConsistent : TimeTable >< Net -> Bool
     allPlansConsistent(tt, n) is (
       let
@@ -97,25 +113,31 @@ class
       end
     ),
     
+    -- checks that for a given plan the station capacity for each trip
+    -- will not be violated (inted input plan is the total plan)
     noStationCollisions : Plan >< Net -> Bool
     noStationCollisions(p, n) is (
-    all t1 : Trip :- t1 isin p => (
+      all t1 : Trip :- t1 isin p => (
         let
           s = getStop(id(t1), n),
           cap = cap(s),
           wt = wt(s),
+          -- subset of trips to the same station
           sameStations = {t2 | t2 : Trip :- t2 isin p /\ id(t2) = id(t1)},
-          possibleArrConflicts = {t2 | t2 : Trip :- t2 isin sameStations /\ dept(t1) >= arrt(t2) /\ dept(t1) - arrt(t2) < wt}
+          -- subset of trips overlapping in time at the station
+          possibleArrConflicts = {t2 | t2 : Trip :- t2 isin sameStations /\ 
+            dept(t1) >= arrt(t2) /\ dept(t1) - arrt(t2) < wt}
         in
           card possibleArrConflicts <= cap
         end
       )
     ) 
- 
-  value /* predicates to check time tables */   
-    isWellformed : TimeTable >< Net -> Bool
-    isWellformed(tt, n) is (
-      allPlansConsistent(tt, n) /\ noStationCollisions(combineAllPlans(tt), n)
-    )
-    
+
+value /* predicates to check time tables */
+  -- checks that a timetable is well formed in terms of consistent plans
+  -- and no station capacities being violated
+  isWellformed : TimeTable >< Net -> Bool
+  isWellformed(tt, n) is (
+    allPlansConsistent(tt, n) /\ noStationCollisions(combineAllPlans(tt), n)
+  )
 end  
