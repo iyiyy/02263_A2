@@ -27,19 +27,28 @@ class
       tt !! [tid +> getPlan(tid, tt) ^ <.mk_Trip(sid, arrt, dept).>]
     ),
 
-    getPlan : TramId >< TimeTable -~-> Plan
+    -- return the plan for a tram or an empty plan
+    getPlan : TramId >< TimeTable -> Plan
     getPlan(tid, tt) is (
-      hd rng (tt / {tid})
+      let
+        ps = rng (tt / {tid})
+      in
+        if ps ~= {} then
+          hd ps
+        else
+          <..>
+        end
+      end
     )
-    -- get
+
     value /* observers */
     -- check whether a tram with a given name exists in a given time table
     isIn : TramId >< TimeTable -> Bool
     isIn(tid, tt) is (
       tid isin tt
     ),
-    -- you can add more observers here
-    --...
+
+    -- combines all the plans for all the tram into a single plan
     combineAllPlans : TimeTable -> Plan
     combineAllPlans(tt) is (
       local
@@ -55,6 +64,9 @@ class
       end
     ),
 
+    -- checks if a plan is consistent in terms of
+    -- respecting the minimum wait time for the current stop
+    -- and minimum drive time for the track to the next stop
     consistent : Plan >< Net -> Bool
     consistent(p, n) is (
       local
@@ -84,7 +96,9 @@ class
           b1 /\ b2
         end
     ),
-
+    
+    -- check that all the plans in the timetable are
+    -- consistent according to @consistent
     allPlansConsistent : TimeTable >< Net -> Bool
     allPlansConsistent(tt, n) is (
       let
@@ -98,7 +112,9 @@ class
         end
       end
     ),
-
+    
+    -- checks that for a given plan the station capacity for each trip
+    -- will not be violated (inted input plan is the total plan)
     noStationCollisions : Plan >< Net -> Bool
     noStationCollisions(p, n) is (
       all t1 : Trip :- t1 isin p => (
@@ -115,7 +131,9 @@ class
       )
     ) 
 
-value /* predicates to check time tables */   
+value /* predicates to check time tables */
+  -- checks that a timetable is well formed in terms of consistent plans
+  -- and no station capacities being violated
   isWellformed : TimeTable >< Net -> Bool
   isWellformed(tt, n) is (
     allPlansConsistent(tt, n) /\ noStationCollisions(combineAllPlans(tt), n)
