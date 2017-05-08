@@ -48,7 +48,7 @@ class
       tid isin tt
     ),
 
-    -- combines all the plans for all the tram into a single plan
+    -- combines all the plans for all the trams into a single plan
     combineAllPlans : TimeTable -> Plan
     combineAllPlans(tt) is (
       local
@@ -122,9 +122,11 @@ class
           s = getStop(id(t1), n),
           cap = cap(s),
           wt = wt(s),
-          sameStations = {t2 | t2 : Trip :- t2 isin p /\ id(t2) = id(t1)}, -- subset of trips to the same station
+          -- subset of trips to the same station
+          sameStations = {t2 | t2 : Trip :- t2 isin p /\ id(t2) = id(t1)},
+          -- subset of trips overlapping in time at the station
           possibleArrConflicts = {t2 | t2 : Trip :- t2 isin sameStations /\ 
-            dept(t1) >= arrt(t2) /\ dept(t1) - arrt(t2) < wt} -- subset of trips overlapping in time at the station
+            dept(t1) >= arrt(t2) /\ dept(t1) - arrt(t2) < wt}
         in
           card possibleArrConflicts <= cap
         end
