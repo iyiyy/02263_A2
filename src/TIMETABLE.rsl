@@ -35,14 +35,22 @@ class
      isIn : TramId >< TimeTable -> Bool
      isIn(tid, tt) is (
        tid isin tt
-     )
+     ),
      -- you can add more observers here
      --...
- 
-  value /* predicates to check time tables */   
-    isWellformed : TimeTable >< Net -> Bool
-    isWellformed(t, n) is (
-      true
+    combineAllPlans : TimeTable -> Plan
+    combineAllPlans(tt) is (
+      local
+        variable
+          ps : Plan-set := rng tt,
+          totalPlan : Plan := <..>
+      in
+        while ps ~= {} do 
+          totalPlan := totalPlan ^ hd ps;
+          ps := ps \ {hd ps}
+        end;
+      totalPlan
+      end
     ),
     
     consistent : Plan >< Net -> Bool
@@ -73,5 +81,42 @@ class
         end;
         b1 /\ b2
       end
+    ),
+    
+    allPlansConsistent : TimeTable >< Net -> Bool
+    allPlansConsistent(tt, n) is (
+      let
+        ps = rng tt
+      in
+        if ps = {} then
+          false
+        else
+          all p : Plan :- p isin ps =>
+            consistent(p, n)
+        end
+      end
+    ),
+    
+    noStationCollisions : Plan >< Net -> Bool
+    noStationCollisions(p, n) is (
+    all t1 : Trip :- t1 isin p => (
+        let
+          s = getStop(id(t1), n),
+          cap = cap(s),
+          wt = wt(s),
+          sameStations = {t2 | t2 : Trip :- t2 isin p /\ id(t2) = id(t1)},
+          possibleArrConflicts = {t2 | t2 : Trip :- t2 isin sameStations /\ dept(t1) >= arrt(t2) /\ dept(t1) - arrt(t2) < wt},
+          possibleDepConflicts = {t2 | t2 : Trip :- t2 isin sameStations /\ dept(t1) >= dept(t2)}
+        in
+          card possibleArrConflicts <= cap
+        end
+      )
+    ) 
+ 
+  value /* predicates to check time tables */   
+    isWellformed : TimeTable >< Net -> Bool
+    isWellformed(tt, n) is (
+      allPlansConsistent(tt, n) /\ noStationCollisions(combineAllPlans(tt), n)
     )
+    
 end  
