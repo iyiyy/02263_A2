@@ -43,5 +43,5 @@ class
 	[IS_IN_2] isIn("tram1", timeTable2) = false,
 	[GET_PLAN] getPlan("tram1", timeTable1) = plan1,
 	[IS_WELLFORMED] isWellformed(timeTable1, n1),
-	[CONSISTENT] consistent(plan1, n1)
+	[CONSISTENT] consistent(plan2, n1)
 end

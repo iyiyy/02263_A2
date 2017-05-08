@@ -105,8 +105,7 @@ class
           cap = cap(s),
           wt = wt(s),
           sameStations = {t2 | t2 : Trip :- t2 isin p /\ id(t2) = id(t1)},
-          possibleArrConflicts = {t2 | t2 : Trip :- t2 isin sameStations /\ dept(t1) >= arrt(t2) /\ dept(t1) - arrt(t2) < wt},
-          possibleDepConflicts = {t2 | t2 : Trip :- t2 isin sameStations /\ dept(t1) >= dept(t2)}
+          possibleArrConflicts = {t2 | t2 : Trip :- t2 isin sameStations /\ dept(t1) >= arrt(t2) /\ dept(t1) - arrt(t2) < wt}
         in
           card possibleArrConflicts <= cap
         end
