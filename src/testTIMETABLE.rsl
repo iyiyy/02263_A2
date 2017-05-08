@@ -2,34 +2,46 @@ TIMETABLE
 scheme testTIMETABLE =
 extend TIMETABLE with
 class
-	value
-	/* TRIPS */
-		trip1 : Trip = mk_Trip("A", 0, 1), -- minWaiting time 1 min travel time 1 min, A -> B
-		trip2 : Trip = mk_Trip("B", 1, 3), -- minWaiting time 2 min travel time 2 min B -> C
-		trip3 : Trip = mk_Trip("C", 5, 8), -- minWaiting time 3 min travel time 2 min C -> B
-		trip4 : Trip = mk_Trip("B", 10, 12), -- minWaiting time 2 min travel time 2 min B -> A
-		trip5 : Trip = mk_Trip("A", 11, 13), -- minWaiting time 1 min travel time 1 min A -> B
-		trip6 : Trip = mk_Trip("B", 0, 1), -- minWaiting time 1 min travel time 3 min B -> D
-		trip7 : Trip = mk_Trip("D", 4, 7), -- minWaiting time 3 min travel time 3 min D -> B
-	
-	/* PLANS */
-		plan1 : Plan = <.trip1, trip2, trip3, trip4, trip5, trip6, trip7.>, -- Plan with all trips 
-		plan2 : Plan = <.trip1.>, -- Plan with one trip A -> B
-		plan3 : Plan = <.trip1, trip3.>, -- Plan with two trips A -> B, C -> B
+  value
+  /* TRIPS */
+	trip1 : Trip = mk_Trip("A", 0, 1), -- minWaiting time 1 min travel time 1 min, A -> B
+	trip2 : Trip = mk_Trip("B", 1, 3), -- minWaiting time 2 min travel time 2 min B -> C
+	trip3 : Trip = mk_Trip("C", 5, 8), -- minWaiting time 3 min travel time 2 min C -> B
+	trip4 : Trip = mk_Trip("B", 10, 12), -- minWaiting time 2 min travel time 2 min B -> A
+	trip5 : Trip = mk_Trip("A", 11, 13), -- minWaiting time 1 min travel time 1 min A -> B
+	trip6 : Trip = mk_Trip("B", 0, 1), -- minWaiting time 1 min travel time 3 min B -> D
+	trip7 : Trip = mk_Trip("D", 4, 7), -- minWaiting time 3 min travel time 3 min D -> B
 
-	/* TIMETABLE */
-		timeTable1 : TimeTable = ["tram1" +> plan1],
-		timeTable2 : TimeTable = ["tram2" +> plan2],
-		timeTable3 : TimeTable = ["tram3" +> plan3]
+  /* PLANS */
+	plan1 : Plan = <.trip1, trip2, trip3, trip4, trip5, trip6, trip7.>, -- Plan with all trips 
+	plan2 : Plan = <.trip1.>, -- Plan with one trip A -> B
+	plan3 : Plan = <.trip1, trip3.>, -- Plan with two trips A -> B, C -> B
+
+  /* TIMETABLE */
+	timeTable1 : TimeTable = ["tram1" +> plan1],
+	timeTable2 : TimeTable = ["tram2" +> plan2],
+	timeTable3 : TimeTable = ["tram3" +> plan3],
+
+  /* TEST SETUP FOR IS_WELLFORMED AND CONSISTENT */
+	A : Stop = mk_Stop("A",0,1), -- stopId, cap, wt
+	B : Stop = mk_Stop("B",1,3),
+	trk1 : Track = mk_Track(1,3), -- cap, dt  
+	conn1 : Connection = mk_Connection(id(A), id(B), trk1),
+	ss1 : Stop-set = {A,B},
+	cs1 : Connection-set = {conn1}, 
+	n1 : Net = mk_Net(ss1,cs1)
 	
-	test_case
+  test_case
 	[ADD_TRAM] addTram("t1", empty),
-    [ADD_STOP] 
-      let 
-        m = ["t1" +> <..>, "t2" +> <.mk_Trip("s1", 0, 2).>]
-      in
-        addStop("t1", "s2", 0, 2, m)
-      end,
+	[ADD_STOP] 
+	  let 
+	    m = ["t1" +> <..>, "t2" +> <.mk_Trip("s1", 0, 2).>]
+	  in
+	    addStop("t1", "s2", 0, 2, m)
+	  end,
 	[IS_IN_1] isIn("tram1", timeTable1) = true,
-	[IS_IN_2] isIn("tram1", timeTable2) = false
+	[IS_IN_2] isIn("tram1", timeTable2) = false,
+	[GET_PLAN] getPlan("tram1", timeTable1) = plan1,
+	[IS_WELLFORMED] isWellformed(timeTable1, n1),
+	[CONSISTENT] consistent(plan1, n1)
 end
