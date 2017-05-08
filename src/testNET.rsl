@@ -2,120 +2,120 @@ NET
 scheme testNET =
 extend NET with 
 class
-	value
-	/* STOPS */	  
-		s1 : Stop = mk_Stop("s1",1,1), -- stopId, cap, wt
-		s2 : Stop = mk_Stop("s2",1,1),
-		s3 : Stop = mk_Stop("s3",1,1),
-		s4 : Stop = mk_Stop("s4",1,1),
-		s5 : Stop = mk_Stop("s5",1,1),
-		s6 : Stop = mk_Stop("s6",1,1),
-		s7 : Stop = mk_Stop("s1",2,1),
-		s8 : Stop = mk_Stop("s1",1,2),
-		
-	/* TRACKS */	  
-		trk1 : Track = mk_Track(1,1), -- cap, dt
-		trk2 : Track = mk_Track(1,1),
-		trk3 : Track = mk_Track(1,1),
-		trk4 : Track = mk_Track(2,2),
-		
-	/* CONNECTIONS */	  
-		conn1 : Connection = mk_Connection(id(s1), id(s2), trk1),
-		conn2 : Connection = mk_Connection(id(s3), id(s4), trk2),
-		conn3 : Connection = mk_Connection(id(s2), id(s3), trk1),
-		conn4 : Connection = mk_Connection(id(s1), id(s3), trk1),
-		conn5 : Connection = mk_Connection(id(s3), id(s4), trk1),
-		conn6 : Connection = mk_Connection(id(s3), id(s4), trk4),
-		
-		
-	/* TESTING SETUP FOR NO_FLOATING_CONNECTIONS */
-		  
-		/* [NO_FLOATING_CONNECTIONS_1] */
-		ss1 : Stop-set = {},
-		cs1 : Connection-set = {conn1}, 
-		n1 : Net = mk_Net(ss1,cs1),
-		
-		/* [NO_FLOATING_CONNECTIONS_2] */
-		ss2 : Stop-set = {s1},
-		cs2 : Connection-set = {conn1}, 
-		n2 : Net = mk_Net(ss2,cs2),
-		
-		/* [NO_FLOATING_CONNECTIONS_3] */
-		ss3 : Stop-set = {s2},
-		cs3 : Connection-set = {conn1}, 
-		n3 : Net = mk_Net(ss3,cs3),
-		
-		/* [NO_FLOATING_CONNECTIONS_4] */
-		ss4 : Stop-set = {s1,s2},
-		cs4 : Connection-set = {conn1}, 
-		n4 : Net = mk_Net(ss4,cs4),
+  value
+  /* STOPS */	  
+	s1 : Stop = mk_Stop("s1",1,1), -- stopId, cap, wt
+	s2 : Stop = mk_Stop("s2",1,1),
+	s3 : Stop = mk_Stop("s3",1,1),
+	s4 : Stop = mk_Stop("s4",1,1),
+	s5 : Stop = mk_Stop("s5",1,1),
+	s6 : Stop = mk_Stop("s6",1,1),
+	s7 : Stop = mk_Stop("s1",2,1),
+	s8 : Stop = mk_Stop("s1",1,2),
+	
+  /* TRACKS */	  
+	trk1 : Track = mk_Track(1,1), -- cap, dt
+	trk2 : Track = mk_Track(1,1),
+	trk3 : Track = mk_Track(1,1),
+	trk4 : Track = mk_Track(2,2),
+	
+  /* CONNECTIONS */	  
+	conn1 : Connection = mk_Connection(id(s1), id(s2), trk1),
+	conn2 : Connection = mk_Connection(id(s3), id(s4), trk2),
+	conn3 : Connection = mk_Connection(id(s2), id(s3), trk1),
+	conn4 : Connection = mk_Connection(id(s1), id(s3), trk1),
+	conn5 : Connection = mk_Connection(id(s3), id(s4), trk1),
+	conn6 : Connection = mk_Connection(id(s3), id(s4), trk4),
+	
+	
+  /* TESTING SETUP FOR NO_FLOATING_CONNECTIONS */
+	  
+	/* [NO_FLOATING_CONNECTIONS_1] */
+	ss1 : Stop-set = {},
+	cs1 : Connection-set = {conn1}, 
+	n1 : Net = mk_Net(ss1,cs1),
+	
+	/* [NO_FLOATING_CONNECTIONS_2] */
+	ss2 : Stop-set = {s1},
+	cs2 : Connection-set = {conn1}, 
+	n2 : Net = mk_Net(ss2,cs2),
+	
+	/* [NO_FLOATING_CONNECTIONS_3] */
+	ss3 : Stop-set = {s2},
+	cs3 : Connection-set = {conn1}, 
+	n3 : Net = mk_Net(ss3,cs3),
+	
+	/* [NO_FLOATING_CONNECTIONS_4] */
+	ss4 : Stop-set = {s1,s2},
+	cs4 : Connection-set = {conn1}, 
+	n4 : Net = mk_Net(ss4,cs4),
 		
   	/* TESTING SETUP FOR NO_ISOLATED_NETS */
   	
-  		/* [NO_ISOLATED_NETS_1]*/
-  		ss5 : Stop-set = {s1,s2,s3},
-		cs5 : Connection-set = {conn1}, 
-		n5 : Net = mk_Net(ss5,cs5),
+  	/* [NO_ISOLATED_NETS_1]*/
+  	ss5 : Stop-set = {s1,s2,s3},
+	cs5 : Connection-set = {conn1}, 
+	n5 : Net = mk_Net(ss5,cs5),
   		
-   		/* [NO_ISOLATED_NETS_2]*/
-  		ss6 : Stop-set = {s1,s2,s3,s4},
-		cs6 : Connection-set = {conn1,conn2}, 
-		n6 : Net = mk_Net(ss6,cs6),
+   	/* [NO_ISOLATED_NETS_2]*/
+  	ss6 : Stop-set = {s1,s2,s3,s4},
+	cs6 : Connection-set = {conn1,conn2}, 
+	n6 : Net = mk_Net(ss6,cs6),
 		
-  		/* [NO_ISOLATED_NETS_3]*/
-  		ss7 : Stop-set = {s1,s2,s3},
-		cs7 : Connection-set = {conn1,conn3}, 
-		n7 : Net = mk_Net(ss7,cs7),
+  	/* [NO_ISOLATED_NETS_3]*/
+  	ss7 : Stop-set = {s1,s2,s3},
+	cs7 : Connection-set = {conn1,conn3}, 
+	n7 : Net = mk_Net(ss7,cs7),
 		
-  		/* [NO_ISOLATED_NETS_4]*/
-  		ss8 : Stop-set = {s1,s2,s3,s4},
-		cs8 : Connection-set = {conn1,conn4,conn5,conn6}, 
-		n8 : Net = mk_Net(ss8,cs8),
+  	/* [NO_ISOLATED_NETS_4]*/
+  	ss8 : Stop-set = {s1,s2,s3,s4},
+	cs8 : Connection-set = {conn1,conn4,conn5,conn6}, 
+	n8 : Net = mk_Net(ss8,cs8),
 		
 	/* TESTING SETUP FOR IS_WELLFORMED */	
- 		ss9 : Stop-set = {s1,s2},
-		cs9 : Connection-set = {conn1}, 
-		n9 : Net = mk_Net(ss9,cs9),
+ 	ss9 : Stop-set = {s1,s2},
+	cs9 : Connection-set = {conn1}, 
+	n9 : Net = mk_Net(ss9,cs9),
 		
 	/* TESTING SETUP FOR LEGAL_STOP */
-		ss10 : Stop-set = {s1,s7},
-		cs10: Connection-set = {conn1}, 
-		n10 : Net = mk_Net(ss10, cs10),
-		
-		ss11 : Stop-set = {s1,s2},
-		cs11: Connection-set = {conn1}, 
-		n11 : Net = mk_Net(ss11, cs11),
-		
-	/* TESTING SETUP FOR LEGAL_CONNECTION */	
-		ss12 : Stop-set = {s1,s2},
-		cs12: Connection-set = {conn5, conn6}, 
-		n12 : Net = mk_Net(ss12, cs12),
-		
-		ss13 : Stop-set = {s1,s2},
-		cs13: Connection-set = {conn5}, 
-		n13 : Net = mk_Net(ss13, cs13)
+	ss10 : Stop-set = {s1,s7},
+	cs10: Connection-set = {conn1}, 
+	n10 : Net = mk_Net(ss10, cs10),
 	
-	test_case
-		[LEGAL_STOP_1] allStopsLegal(n10) = false,
-		[LEGAL_STOP_2] allStopsLegal(n11),
-		[LEGAL_CONNECTION_1] allConnectionsLegal(n12) = false,
-		[LEGAL_CONNECTION_2] allConnectionsLegal(n13),
-		[IS_IN_STOP_1] isIn("s4", n6) = true,
-		[IS_IN_STOP_2] isIn("s5", n8) = false,
-		[IS_IN_CONNECTION_1] isIn("s1","s2", n5) = true,
-		[IS_IN_CONNECTION_2] isIn("s2","s5", n8) = false,
-		[CAPACITY_1] capacity("s1", n1) = 0,
-		[CAPACITY_2] capacity("s1", n2) = 1,
-		[MIN_WAITING_TIME_1] minWaitingTime("s1", n1) = 0,
-		[MIN_WAITING_TIME_2] minWaitingTime("s1", n5) = 1,
-		[NO_FLOATING_CONNECTIONS_1] noFloatingConns(n1) = false,
-		[NO_FLOATING_CONNECTIONS_2] noFloatingConns(n2) = false,
-		[NO_FLOATING_CONNECTIONS_3] noFloatingConns(n3) = false,
-		[NO_FLOATING_CONNECTIONS_4] noFloatingConns(n4) = true, 
-		[NO_ISOLATED_NETS_1] noIsoNets(ss5,n5) = false,
-		[NO_ISOLATED_NETS_2] noIsoNets(ss6,n6) = false,
-		[NO_ISOLATED_NETS_3] noIsoNets(ss7,n7) = true,
-		[NO_ISOLATED_NETS_4] noIsoNets(ss8,n8) = true,
-		[IS_WELLFORMED_NET_1] isWellformed(n9) = true
+	ss11 : Stop-set = {s1,s2},
+	cs11: Connection-set = {conn1}, 
+	n11 : Net = mk_Net(ss11, cs11),
+	
+/* TESTING SETUP FOR LEGAL_CONNECTION */	
+	ss12 : Stop-set = {s1,s2},
+	cs12: Connection-set = {conn5, conn6}, 
+	n12 : Net = mk_Net(ss12, cs12),
+	
+	ss13 : Stop-set = {s1,s2},
+	cs13: Connection-set = {conn5}, 
+	n13 : Net = mk_Net(ss13, cs13)
+	
+  test_case
+	[LEGAL_STOP_1] allStopsLegal(n10) = false,
+	[LEGAL_STOP_2] allStopsLegal(n11),
+	[LEGAL_CONNECTION_1] allConnectionsLegal(n12) = false,
+	[LEGAL_CONNECTION_2] allConnectionsLegal(n13),
+	[IS_IN_STOP_1] isIn("s4", n6) = true,
+	[IS_IN_STOP_2] isIn("s5", n8) = false,
+	[IS_IN_CONNECTION_1] isIn("s1","s2", n5) = true,
+	[IS_IN_CONNECTION_2] isIn("s2","s5", n8) = false,
+	[CAPACITY_1] capacity("s1", n1) = 0,
+	[CAPACITY_2] capacity("s1", n2) = 1,
+	[MIN_WAITING_TIME_1] minWaitingTime("s1", n1) = 0,
+	[MIN_WAITING_TIME_2] minWaitingTime("s1", n5) = 1,
+	[NO_FLOATING_CONNECTIONS_1] noFloatingConns(n1) = false,
+	[NO_FLOATING_CONNECTIONS_2] noFloatingConns(n2) = false,
+	[NO_FLOATING_CONNECTIONS_3] noFloatingConns(n3) = false,
+	[NO_FLOATING_CONNECTIONS_4] noFloatingConns(n4) = true, 
+	[NO_ISOLATED_NETS_1] noIsoNets(ss5,n5) = false,
+	[NO_ISOLATED_NETS_2] noIsoNets(ss6,n6) = false,
+	[NO_ISOLATED_NETS_3] noIsoNets(ss7,n7) = true,
+	[NO_ISOLATED_NETS_4] noIsoNets(ss8,n8) = true,
+	[IS_WELLFORMED_NET_1] isWellformed(n9) = true
 
  end
