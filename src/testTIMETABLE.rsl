@@ -66,8 +66,8 @@ class
     tt2 : TimeTable = [tram1 +> p1, tram4 +> p4] -- created to test noStationCollition
     
   test_case
-  	[IS_IN_1] isIn("tram1", tt) = true,
-	[IS_IN_2] isIn("tram10", tt) = false,
+  	[IS_IN] isIn("tram1", tt) = true,
+	[IS_IN_NOT_EXISTING] isIn("tram10", tt) = false,
 	[ADD_TRAM] isIn("tram1", addTram("tram1", empty)),	
 	[ADD_STOP] isIn("tram1", addStop("tram1", "s1", 1, 1, tt)),
 	[GET_PLAN] getPlan("tram1", tt) = p1,
@@ -78,7 +78,8 @@ class
 	  len pt = 10
 	  end,
 	[NO_STATION_COLLISIONS] noStationCollisions(p1,n),
-	[NO_STATION_COLLISIONS_VIOLATE_CAPACITY] noStationCollisions(combineAllPlans(tt2),n1) = false,
+	[NO_STATION_COLLISIONS_VIOLATE_CAPACITY] noStationCollisions(combineAllPlans(tt2),n1)
+	 = false,
 	[IS_WELLFORMED] isWellformed(tt, n),
 	[IS_WELLFORMED_VIOLATE_DRIVING_TIME] isWellformed(tt1, n) = false,
 	[CONSISTENT] consistent(p1, n),
