@@ -3,45 +3,85 @@ scheme testTIMETABLE =
 extend TIMETABLE with
 class
   value
-  /* TRIPS */
-	trip1 : Trip = mk_Trip("A", 0, 1), -- minWaiting time 1 min travel time 1 min, A -> B
-	trip2 : Trip = mk_Trip("B", 1, 3), -- minWaiting time 2 min travel time 2 min B -> C
-	trip3 : Trip = mk_Trip("C", 5, 8), -- minWaiting time 3 min travel time 2 min C -> B
-	trip4 : Trip = mk_Trip("B", 10, 12), -- minWaiting time 2 min travel time 2 min B -> A
-	trip5 : Trip = mk_Trip("A", 11, 13), -- minWaiting time 1 min travel time 1 min A -> B
-	trip6 : Trip = mk_Trip("B", 0, 1), -- minWaiting time 1 min travel time 3 min B -> D
-	trip7 : Trip = mk_Trip("D", 4, 7), -- minWaiting time 3 min travel time 3 min D -> B
-
-  /* PLANS */
-	plan1 : Plan = <.trip1, trip2, trip3, trip4, trip5, trip6, trip7.>, -- Plan with all trips 
-	plan2 : Plan = <.trip1.>, -- Plan with one trip A -> B
-	plan3 : Plan = <.trip1, trip3.>, -- Plan with two trips A -> B, C -> B
-
-  /* TIMETABLE */
-	timeTable1 : TimeTable = ["tram1" +> plan1],
-	timeTable2 : TimeTable = ["tram2" +> plan2],
-	timeTable3 : TimeTable = ["tram3" +> plan3],
-
-  /* TEST SETUP FOR IS_WELLFORMED AND CONSISTENT */
-	A : Stop = mk_Stop("A",0,1), -- stopId, cap, wt
-	B : Stop = mk_Stop("B",1,3),
-	trk1 : Track = mk_Track(1,3), -- cap, dt  
-	conn1 : Connection = mk_Connection(id(A), id(B), trk1),
-	ss1 : Stop-set = {A,B},
-	cs1 : Connection-set = {conn1}, 
-	n1 : Net = mk_Net(ss1,cs1)
-	
+	A : Stop = mk_Stop("A",2,1), -- id, cap, wt
+    B : Stop = mk_Stop("B",3,2),
+    BB : Stop = mk_Stop("B",1,2), -- created to test noStationCollition
+    C : Stop = mk_Stop("C",2,1),
+    D : Stop = mk_Stop("D",2,1),
+    tAB : Track = mk_Track(1, 10),
+    tBC : Track = mk_Track(2, 12),
+    tBD : Track = mk_Track(3, 7),
+    cAB : Connection = mk_Connection(id(A), id(B), tAB),
+    cBC : Connection = mk_Connection(id(B), id(C), tBC),
+    cBD : Connection = mk_Connection(id(B), id(D), tBD),
+    ss : Stop-set = {A,B,C,D},
+    cs : Connection-set = {cAB, cBC, cBD},
+    n : Net = mk_Net(ss, cs),
+    
+    ss1 : Stop-set = {A,BB,C,D}, -- created to test noStationCollition
+    n1 : Net = mk_Net(ss1, cs), -- created to test noStationCollition
+        
+    tram1 : TramId = "tram1",
+    t11 : Trip = mk_Trip(id(A), 0, 1),
+    t12 : Trip = mk_Trip(id(B), 12, 14),
+    t13 : Trip = mk_Trip(id(C), 28, 32),
+    t14 : Trip = mk_Trip(id(B), 46, 48),
+    t15 : Trip = mk_Trip(id(A), 59, 60),
+    p1 : Plan = <.t11, t12, t13, t14, t15.>,
+    
+    tram2 : TramId = "tram2",
+    t21 : Trip = mk_Trip(id(D), 0, 2),
+    t22 : Trip = mk_Trip(id(B), 10, 13),
+    t23 : Trip = mk_Trip(id(A), 28, 32),
+    t24 : Trip = mk_Trip(id(B), 47, 50),
+    t25 : Trip = mk_Trip(id(D), 58, 60),
+    p2 : Plan = <.t21, t22, t23, t24, t25.>,
+    
+    tram3 : TramId = "tram3",
+    t31 : Trip = mk_Trip(id(A), 0, 1),
+    t32 : Trip = mk_Trip(id(B), 12, 13), --violating driving time
+    t33 : Trip = mk_Trip(id(C), 28, 32),
+    t34 : Trip = mk_Trip(id(B), 46, 48),
+    t35 : Trip = mk_Trip(id(A), 59, 60),
+    p3 : Plan = <.t31, t32, t33, t34, t35.>,
+    
+    tram4 : TramId = "tram4",
+    t41 : Trip = mk_Trip(id(A), 0, 1),
+    t42 : Trip = mk_Trip(id(BB), 12, 13),
+    t43 : Trip = mk_Trip(id(C), 28, 32),
+    t44 : Trip = mk_Trip(id(BB), 46, 48),
+    t45 : Trip = mk_Trip(id(A), 59, 60),
+    p4 : Plan = <.t41, t42, t43, t44, t45.>,
+    
+    tram5 : TramId = "tram5",
+    t51 : Trip = mk_Trip(id(A), 0, 1),
+    t52 : Trip = mk_Trip(id(B), 12, 14),
+    t53 : Trip = mk_Trip(id(C), 24, 32), -- violating arrival time
+    t54 : Trip = mk_Trip(id(B), 46, 48),
+    t55 : Trip = mk_Trip(id(A), 59, 60),
+    p5 : Plan = <.t51, t52, t53, t54, t55.>,
+    
+    tt : TimeTable = [tram1 +> p1, tram2 +> p2], -- Well formed TimeTable
+    tt1 : TimeTable = [tram1 +> p1, tram3 +> p3], -- Not well formed TimeTable
+    tt2 : TimeTable = [tram1 +> p1, tram4 +> p4] -- created to test noStationCollition
+    
   test_case
-	[ADD_TRAM] addTram("t1", empty),
-	[ADD_STOP] 
-	  let 
-	    m = ["t1" +> <..>, "t2" +> <.mk_Trip("s1", 0, 2).>]
+  	[IS_IN_1] isIn("tram1", tt) = true,
+	[IS_IN_2] isIn("tram10", tt) = false,
+	[ADD_TRAM] isIn("tram1", addTram("tram1", empty)),	
+	[ADD_STOP] isIn("tram1", addStop("tram1", "s1", 1, 1, tt)),
+	[GET_PLAN] getPlan("tram1", tt) = p1,
+	[COMBINE_ALL_PLANS]
+	 let
+	  pt = combineAllPlans(tt)
 	  in
-	    addStop("t1", "s2", 0, 2, m)
+	  len pt = 10
 	  end,
-	[IS_IN_1] isIn("tram1", timeTable1) = true,
-	[IS_IN_2] isIn("tram1", timeTable2) = false,
-	[GET_PLAN] getPlan("tram1", timeTable1) = plan1,
-	[IS_WELLFORMED] isWellformed(timeTable1, n1),
-	[CONSISTENT] consistent(plan2, n1)
+	[NO_STATION_COLLISIONS] noStationCollisions(p1,n),
+	[NO_STATION_COLLISIONS_VIOLATE_CAPACITY] noStationCollisions(combineAllPlans(tt2),n1) = false,
+	[IS_WELLFORMED] isWellformed(tt, n),
+	[IS_WELLFORMED_VIOLATE_DRIVING_TIME] isWellformed(tt1, n) = false,
+	[CONSISTENT] consistent(p1, n),
+	[CONSISTENT_VIOLATE_DEPARTURE_TIME] consistent(p3, n) = false,
+	[CONSISTENT_VIOLATE_ARRIVAL_TIME] consistent(p5, n) = false
 end
